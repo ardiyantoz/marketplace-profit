@@ -3,3 +3,4 @@ dist
 .impeccable/config.local.json
 .impeccable/review
 *.local
+*.tsbuildinfo
