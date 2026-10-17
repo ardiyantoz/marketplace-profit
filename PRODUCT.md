@@ -31,7 +31,7 @@ Shopee shows "Total Penghasilan", which sellers mistake for profit. This tool su
 
 ## Capabilities and Constraints
 
-- MVP: Shopee only. TikTok Shop/Tokopedia and Lazada later on the same data model.
+- Shopee and TikTok Shop (incl. Tokopedia stores on TikTok Shop Seller Center) on one data model; one marketplace per analysis. Lazada later.
 - All parsing and computation in the browser; no backend, no login, no server storage.
 - Month filter and month-over-month comparison.
 - Undecided: HPP varying by period, ad spend allocation rule, accrual vs settlement-date month.

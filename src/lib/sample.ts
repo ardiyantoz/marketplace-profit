@@ -1,4 +1,5 @@
 import { monthKey } from './format';
+import type { Marketplace } from './marketplace';
 import type { AdRow, Dataset, HppMap, IncomeRow, OrderLine } from './types';
 
 // Synthetic demo shop. Every figure here is invented and labelled "Data contoh" in the UI.
@@ -30,6 +31,15 @@ const PAYMENTS: [string, number][] = [
   ['Kartu Kredit/Debit', 7],
 ];
 
+const PAYMENTS_TIKTOK: [string, number][] = [
+  ['DANA', 26],
+  ['GoPay', 22],
+  ['Virtual Account', 18],
+  ['COD (Bayar di tempat)', 14],
+  ['PayLater', 11],
+  ['OVO', 9],
+];
+
 const BUYERS = ['senyum.hub', 'anggun.place', 'gesit_36', 'damar524', 'senja974', 'evimulan', 'akmala.minha', 'kirana.vio', 'arum_59', 'kopi.sore', 'mbak.tari', 'rizky.dpn', 'naya.home', 'bu_endang', 'pakde.joko'];
 
 function rng(seed: number) {
@@ -59,8 +69,9 @@ export function sampleHpp(): HppMap {
   return out;
 }
 
-export function sampleDataset(): Dataset {
-  const r = rng(20260717);
+export function sampleDataset(mp: Marketplace = 'shopee'): Dataset {
+  const tiktok = mp === 'tiktok';
+  const r = rng(tiktok ? 20260719 : 20260717);
   const orders: OrderLine[] = [];
   const income: IncomeRow[] = [];
   const ads: AdRow[] = [];
@@ -80,9 +91,11 @@ export function sampleDataset(): Dataset {
       seq++;
       const day = 1 + Math.floor(r() * days);
       const date = new Date(y, m, day, 8 + Math.floor(r() * 14), Math.floor(r() * 60));
-      const orderNo = `26${String(m + 1).padStart(2, '0')}${String(day).padStart(2, '0')}${(seq * 7919).toString(36).toUpperCase().padStart(6, 'X')}`;
+      const orderNo = tiktok
+        ? `5794${String(m + 1).padStart(2, '0')}${String(day).padStart(2, '0')}${String(seq * 104729).padStart(10, '0')}`
+        : `26${String(m + 1).padStart(2, '0')}${String(day).padStart(2, '0')}${(seq * 7919).toString(36).toUpperCase().padStart(6, 'X')}`;
       const cancelled = r() < 0.05;
-      const payment = pick(r, PAYMENTS);
+      const payment = pick(r, tiktok ? PAYMENTS_TIKTOK : PAYMENTS);
       const buyer = `${BUYERS[Math.floor(r() * BUYERS.length)]}${Math.floor(r() * 9000 + 1000)}`;
       const lineCount = r() < 0.18 ? 2 : 1;
       let orderSales = 0;
@@ -99,7 +112,7 @@ export function sampleDataset(): Dataset {
           orderNo,
           date,
           month: monthKey(date),
-          status: cancelled ? 'Batal' : 'Selesai',
+          status: cancelled ? (tiktok ? 'Dibatalkan' : 'Batal') : 'Selesai',
           cancelled,
           product: p.name,
           variant: '',
@@ -113,13 +126,14 @@ export function sampleDataset(): Dataset {
       }
       const lateJuly = m === 6 && day > 27;
       if (cancelled || lateJuly) continue;
-      const admin = Math.round(orderSales * 0.076);
-      const service = Math.round(Math.min(orderSales * 0.07, 20000));
-      const ams = r() < 0.35 ? Math.round(orderSales * 0.05) : 0;
-      const processing = 1250;
-      const shipping = r() < 0.3 ? Math.round((6000 + r() * 12000) / 500) * 500 : 0;
-      const voucher = r() < 0.15 ? 5000 : 0;
-      const other = r() < 0.1 ? 1500 : 0;
+      // Fee rates are illustrative, not either marketplace's real tariff.
+      const admin = Math.round(orderSales * (tiktok ? 0.08 : 0.076));
+      const service = tiktok ? Math.round(Math.min(orderSales * 0.04, 15000)) : Math.round(Math.min(orderSales * 0.07, 20000));
+      const ams = r() < (tiktok ? 0.45 : 0.35) ? Math.round(orderSales * (tiktok ? 0.1 : 0.05)) : 0;
+      const processing = tiktok ? Math.round(orderSales * 0.015) : 1250;
+      const shipping = r() < (tiktok ? 0.25 : 0.3) ? Math.round((6000 + r() * 12000) / 500) * 500 : 0;
+      const voucher = !tiktok && r() < 0.15 ? 5000 : 0;
+      const other = !tiktok && r() < 0.1 ? 1500 : 0;
       const settled = new Date(y, m, Math.min(days, day + 3 + Math.floor(r() * 4)));
       income.push({
         orderNo,
@@ -141,7 +155,7 @@ export function sampleDataset(): Dataset {
         if (r() < 0.35) continue;
         const date = new Date(y, m, d);
         const spend = Math.round((9000 + r() * 22000) / 100) * 100;
-        ads.push({ date, month: monthKey(date), campaign: `Iklan ${c.name.split(' - ')[0]}`, product: c.name, spend, gmv: Math.round(spend * (1.5 + r() * 3)), row: adRow++ });
+        ads.push({ date, month: monthKey(date), campaign: `${tiktok ? 'GMV Max' : 'Iklan'} ${c.name.split(' - ')[0]}`, product: c.name, spend, gmv: Math.round(spend * (1.5 + r() * 3)), row: adRow++ });
       }
     }
   }
@@ -152,10 +166,11 @@ export function sampleDataset(): Dataset {
     income,
     ads,
     files: {
-      order: meta('Order.all.contoh.xlsx', orders.length, ms),
-      income: meta('Penghasilan.contoh.xlsx', income.length, ms),
-      ads: meta('Iklan.contoh.csv', ads.length, ms),
+      order: meta(tiktok ? 'Pesanan-TikTokShop.contoh.csv' : 'Order.all.contoh.xlsx', orders.length, ms),
+      income: meta(tiktok ? 'Penyelesaian-TikTokShop.contoh.xlsx' : 'Penghasilan.contoh.xlsx', income.length, ms),
+      ads: meta(tiktok ? 'GMV-Max.contoh.csv' : 'Iklan.contoh.csv', ads.length, ms),
     },
     sample: true,
+    marketplace: mp,
   };
 }

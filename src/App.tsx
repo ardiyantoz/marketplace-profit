@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { allMonths, allProducts, summarize, type MonthFilter } from './lib/compute';
 import { monthLabel, num, prevMonth } from './lib/format';
 import { buildInsights } from './lib/insights';
+import { MARKETPLACES, type Marketplace } from './lib/marketplace';
 import { parseFile } from './lib/parse';
 import { sampleDataset, sampleHpp } from './lib/sample';
 import { emptyDataset, type Dataset, type HppMap } from './lib/types';
@@ -47,6 +48,8 @@ export default function App() {
   const [month, setMonth] = useState<MonthFilter>('all');
   const [errors, setErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [choice, setChoice] = useState<Marketplace>('shopee');
+  const M = MARKETPLACES[data.marketplace ?? choice];
 
   useEffect(() => {
     if (data.sample) return;
@@ -71,15 +74,15 @@ export default function App() {
     const p = prevMonth(month);
     return months.includes(p) ? summarize(data, hpp, p) : null;
   }, [data, hpp, month, months]);
-  const insights = useMemo(() => buildInsights(summary, previous), [summary, previous]);
+  const insights = useMemo(() => buildInsights(summary, previous, M), [summary, previous, M]);
 
   const useSample = useCallback(() => {
-    setData(sampleDataset());
+    setData(sampleDataset(choice));
     setHpp(sampleHpp());
     setMonth('all');
     setErrors([]);
     setTab('dashboard');
-  }, []);
+  }, [choice]);
 
   const reset = useCallback(() => {
     setData(emptyDataset);
@@ -97,6 +100,13 @@ export default function App() {
       for (const f of files) {
         try {
           const parsed = await parseFile(f);
+          if ((parsed.kind === 'order' || parsed.kind === 'income') && next.marketplace && next.marketplace !== parsed.marketplace) {
+            throw new Error(`${f.name} adalah file ${MARKETPLACES[parsed.marketplace].name}, sedangkan data yang sudah dimuat dari ${MARKETPLACES[next.marketplace].name}. Satu analisis untuk satu toko: hapus data dulu kalau mau ganti toko.`);
+          }
+          if (parsed.kind === 'order' || parsed.kind === 'income') {
+            next = { ...next, marketplace: parsed.marketplace };
+            setChoice(parsed.marketplace);
+          }
           if (parsed.kind === 'order') {
             next = { ...next, orders: dedupe([...next.orders, ...parsed.rows], (r) => `${r.orderNo}|${r.product}|${r.variant}`), files: { ...next.files, order: parsed.meta }, sample: false };
           } else if (parsed.kind === 'income') {
@@ -140,7 +150,20 @@ export default function App() {
       <nav className="rail" aria-label="Langkah">
         <div className="brand">
           <strong>Profit Toko</strong>
-          <span>Profit asli toko Shopee</span>
+          <span>Profit asli toko {M.name}</span>
+        </div>
+        <div className="mp-switch" role="group" aria-label="Marketplace">
+          {(['shopee', 'tiktok'] as Marketplace[]).map((id) => (
+            <button
+              key={id}
+              aria-pressed={(data.marketplace ?? choice) === id}
+              disabled={hasData && data.marketplace !== id}
+              title={hasData && data.marketplace !== id ? 'Hapus data di tab Upload untuk ganti marketplace' : undefined}
+              onClick={() => setChoice(id)}
+            >
+              {MARKETPLACES[id].name}
+            </button>
+          ))}
         </div>
         <ol className="steps">
           {TABS.map((t, i) => (
@@ -187,12 +210,12 @@ export default function App() {
             </button>
           </p>
         )}
-        {tab === 'panduan' && <Guide onNext={() => setTab('upload')} />}
-        {tab === 'upload' && <Upload data={data} errors={errors} busy={busy} onFiles={addFiles} onSample={useSample} onReset={reset} onNext={() => setTab(products.length ? 'produk' : 'dashboard')} productsMissingHpp={missingHpp} />}
-        {tab === 'order' && (hasData ? <OrderIncome data={data} summary={summary} month={month} toolbar={monthSelect} /> : <NoData onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'produk' && (hasData ? <Products summary={summary} products={products} hpp={hpp} onHpp={setHpp} toolbar={monthSelect} onNext={() => setTab('dashboard')} /> : <NoData onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'dashboard' && (hasData ? <Dashboard summary={summary} insights={insights} toolbar={monthSelect} goTo={setTab} /> : <NoData onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'insight' && (hasData ? <Insights data={data} hpp={hpp} summary={summary} previous={previous} insights={insights} months={months} toolbar={monthSelect} goTo={setTab} /> : <NoData onUpload={() => setTab('upload')} onSample={useSample} />)}
+        {tab === 'panduan' && <Guide M={M} onNext={() => setTab('upload')} />}
+        {tab === 'upload' && <Upload M={M} data={data} errors={errors} busy={busy} onFiles={addFiles} onSample={useSample} onReset={reset} onNext={() => setTab(products.length ? 'produk' : 'dashboard')} productsMissingHpp={missingHpp} />}
+        {tab === 'order' && (hasData ? <OrderIncome M={M} data={data} summary={summary} month={month} toolbar={monthSelect} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
+        {tab === 'produk' && (hasData ? <Products M={M} summary={summary} products={products} hpp={hpp} onHpp={setHpp} toolbar={monthSelect} onNext={() => setTab('dashboard')} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
+        {tab === 'dashboard' && (hasData ? <Dashboard M={M} summary={summary} insights={insights} toolbar={monthSelect} goTo={setTab} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
+        {tab === 'insight' && (hasData ? <Insights M={M} data={data} hpp={hpp} summary={summary} previous={previous} insights={insights} months={months} toolbar={monthSelect} goTo={setTab} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
       </main>
     </div>
   );

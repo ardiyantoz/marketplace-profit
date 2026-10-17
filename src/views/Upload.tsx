@@ -1,9 +1,11 @@
 import { useRef, useState, type DragEvent } from 'react';
 import { Icon, Notice, Ply } from '../components/ui';
 import { monthLabel, num } from '../lib/format';
+import type { MarketplaceInfo } from '../lib/marketplace';
 import type { Dataset, FileMeta } from '../lib/types';
 
 interface Props {
+  M: MarketplaceInfo;
   data: Dataset;
   errors: string[];
   busy: boolean;
@@ -14,10 +16,10 @@ interface Props {
   onNext: () => void;
 }
 
-const SLOTS: { key: 'order' | 'income' | 'ads'; title: string; need: string }[] = [
-  { key: 'order', title: 'File order', need: 'Wajib · Pesanan Saya › Export' },
-  { key: 'income', title: 'File income', need: 'Wajib · Penghasilan Saya › Laporan' },
-  { key: 'ads', title: 'File iklan', need: 'Opsional · Iklan Shopee › Laporan' },
+const SLOTS: { key: 'order' | 'income' | 'ads'; title: string }[] = [
+  { key: 'order', title: 'File order' },
+  { key: 'income', title: 'File income' },
+  { key: 'ads', title: 'File iklan' },
 ];
 
 function months(meta: FileMeta) {
@@ -26,7 +28,7 @@ function months(meta: FileMeta) {
   return `${monthLabel(meta.months[0], true)} – ${monthLabel(meta.months[meta.months.length - 1], true)}`;
 }
 
-export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSample, onReset, onNext }: Props) {
+export function Upload({ M, data, errors, busy, productsMissingHpp, onFiles, onSample, onReset, onNext }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [over, setOver] = useState(false);
   const ready = !!data.files.order && !!data.files.income;
@@ -43,7 +45,7 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSamp
       <header className="page-head">
         <div>
           <h1>Upload data</h1>
-          <p>Masukkan file Order dan Income. File iklan dan template HPP boleh ikut sekaligus; jenisnya dikenali otomatis.</p>
+          <p>Masukkan file pesanan dan penghasilan dari {M.name}. File iklan dan template HPP boleh ikut sekaligus; jenisnya dikenali otomatis.</p>
         </div>
         <div className="toolbar">
           {data.orders.length > 0 && (
@@ -69,7 +71,7 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSamp
       >
         <Icon name="upload" size={28} />
         <h2>{busy ? 'Membaca file…' : 'Tarik file ke sini'}</h2>
-        <p className="muted">.xlsx atau .csv dari Shopee Seller Centre. Boleh beberapa file sekaligus, termasuk beberapa bulan.</p>
+        <p className="muted">.xlsx atau .csv dari {M.center}. Boleh beberapa file sekaligus, termasuk beberapa bulan.</p>
         <div className="toolbar">
           <button className="btn btn-primary" onClick={() => input.current?.click()} disabled={busy}>
             Pilih file
@@ -84,7 +86,7 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSamp
           multiple
           accept=".xlsx,.xls,.csv"
           className="visually-hidden"
-          aria-label="Pilih file laporan Shopee"
+          aria-label={`Pilih file laporan ${M.name}`}
           onChange={(e) => {
             const files = [...(e.target.files ?? [])];
             if (files.length) onFiles(files);
@@ -101,7 +103,7 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSamp
 
       {data.sample && (
         <Notice tone="info">
-          Sedang memakai <b>data contoh</b> (toko herbal fiktif). Upload file tokomu untuk menggantinya.
+          Sedang memakai <b>data contoh {M.name}</b> (toko herbal fiktif). Upload file tokomu untuk menggantinya.
         </Notice>
       )}
 
@@ -127,14 +129,14 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onSamp
                   ))}
                 </>
               ) : (
-                <p>{slot.need}</p>
+                <p>{M.slots[slot.key]}</p>
               )}
             </section>
           );
         })}
       </div>
 
-      {data.orders.length > 0 && !ready && <Notice tone="warn">File income belum ada. Biaya Shopee akan dianggap Rp0 sampai file income diupload, jadi profit akan terlihat lebih besar dari aslinya.</Notice>}
+      {data.orders.length > 0 && !ready && <Notice tone="warn">File income belum ada. Biaya {M.name} akan dianggap Rp0 sampai file income diupload, jadi profit akan terlihat lebih besar dari aslinya.</Notice>}
       {ready && productsMissingHpp > 0 && (
         <Notice tone="info">
           {productsMissingHpp} produk belum punya HPP. Lanjut ke tab Produk &amp; HPP untuk mengisinya.

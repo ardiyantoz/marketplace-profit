@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { MarketplaceInfo } from '../lib/marketplace';
 import type { Source } from '../lib/types';
 
 export const SOURCE_LABEL: Record<Source, string> = { order: 'Order', income: 'Income', ads: 'Iklan', hpp: 'HPP' };
@@ -52,11 +53,11 @@ export function Notice({ tone, children }: { tone: 'warn' | 'info' | 'loss'; chi
   );
 }
 
-export function NoData({ onUpload, onSample }: { onUpload: () => void; onSample: () => void }) {
+export function NoData({ M, onUpload, onSample }: { M: MarketplaceInfo; onUpload: () => void; onSample: () => void }) {
   return (
     <div className="empty">
       <h2>Belum ada data toko</h2>
-      <p>Upload file Order dan Income dari Shopee Seller Centre. Semua dihitung di browser ini, file tidak dikirim ke mana pun. Mau lihat dulu cara kerjanya? Pakai data contoh.</p>
+      <p>Upload file pesanan dan penghasilan dari {M.center}. Semua dihitung di browser ini, file tidak dikirim ke mana pun. Mau lihat dulu cara kerjanya? Pakai data contoh.</p>
       <div className="row">
         <button className="btn btn-primary" onClick={onUpload}>
           <Icon name="upload" />

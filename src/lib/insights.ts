@@ -1,5 +1,6 @@
 import { WEEKDAYS_FULL as WEEKDAYS, monthLabel, pct, rpShort, shortName } from './format';
 import type { Summary } from './compute';
+import type { MarketplaceInfo } from './marketplace';
 import type { Source } from './types';
 
 export interface Insight {
@@ -16,7 +17,7 @@ export interface Insight {
 const AD_TARGET = 0.15;
 
 /** Deterministic rules over the summary, ranked by rupiah impact. */
-export function buildInsights(s: Summary, prev: Summary | null): Insight[] {
+export function buildInsights(s: Summary, prev: Summary | null, M: MarketplaceInfo): Insight[] {
   const out: Insight[] = [];
   if (!s.omzet) return out;
 
@@ -56,7 +57,7 @@ export function buildInsights(s: Summary, prev: Summary | null): Insight[] {
     out.push({
       id: 'below-cost',
       title: `${belowCost.length} produk dijual di bawah modal`,
-      detail: 'Bahkan sebelum iklan, harga jual dikurangi HPP dan potongan Shopee sudah minus.',
+      detail: `Bahkan sebelum iklan, harga jual dikurangi HPP dan ${M.cutLabel.toLowerCase()} sudah minus.`,
       action: belowCost.slice(0, 3).map((p) => `${shortName(p.product)}: harga minimal ${rpShort((p.hppUnit ?? 0) + (p.marketplace + p.voucher) / p.qty)}`).join('; ') + '.',
       impact: 0,
       sources: ['hpp', 'income'],

@@ -3,9 +3,11 @@ import { Icon, Notice, Ply, Stat } from '../components/ui';
 import type { Summary } from '../lib/compute';
 import { num, rp } from '../lib/format';
 import { downloadHppTemplate, parseFile, toNumber } from '../lib/parse';
+import type { MarketplaceInfo } from '../lib/marketplace';
 import type { HppMap } from '../lib/types';
 
 interface Props {
+  M: MarketplaceInfo;
   summary: Summary;
   products: string[];
   hpp: HppMap;
@@ -14,7 +16,7 @@ interface Props {
   onNext: () => void;
 }
 
-export function Products({ summary, products, hpp, onHpp, toolbar, onNext }: Props) {
+export function Products({ M, summary, products, hpp, onHpp, toolbar, onNext }: Props) {
   const input = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<{ tone: 'info' | 'loss'; text: string } | null>(null);
   const [onlyMissing, setOnlyMissing] = useState(false);
@@ -52,7 +54,7 @@ export function Products({ summary, products, hpp, onHpp, toolbar, onNext }: Pro
       <header className="page-head">
         <div>
           <h1>Produk &amp; HPP</h1>
-          <p>Isi modal per unit (HPP) tiap produk. Ini satu-satunya angka yang tidak ada di laporan Shopee.</p>
+          <p>Isi modal per unit (HPP) tiap produk. Ini satu-satunya angka yang tidak ada di laporan {M.name}.</p>
         </div>
         {toolbar}
       </header>

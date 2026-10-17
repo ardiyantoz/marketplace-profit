@@ -105,7 +105,8 @@ h1, h2, h3, p { margin: 0; }
 .ply-sheet.order { background: var(--ply-order); border-radius: 6px 6px 0 0; }
 .ply-sheet.income { background: var(--ply-income); margin-left: 4px; }
 .ply-sheet.ads { background: var(--ply-ads); margin-left: 8px; border-radius: 0 0 6px 6px; }
-.ply-sheet.missing { opacity: 0.45; }
+.ply-sheet.missing { background: transparent; color: var(--carbon-soft); box-shadow: inset 0 0 0 1px rgba(201, 207, 238, 0.35); }
+.ply-sheet.missing span { color: var(--carbon-mute); }
 .rail-note { font-size: var(--fs-xs); color: #b9c0e6; line-height: 1.5; }
 .rail-note button { padding: 0; border: 0; background: none; color: var(--ply-ads); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; font-size: inherit; }
 .rail-foot { margin-top: auto; font-size: var(--fs-xs); color: var(--carbon-mute); padding: 0 var(--s2); line-height: 1.5; }
@@ -370,3 +371,12 @@ tr.loss-row { background: var(--loss-wash); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
 }
+
+/* ---------- Marketplace switch (rail) ---------- */
+.mp-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; margin: 0 var(--s2); background: var(--carbon-deep); border-radius: 8px; }
+.mp-switch button { height: 32px; border: 0; border-radius: 6px; background: transparent; color: var(--carbon-soft); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; transition: background-color 150ms ease-out, color 150ms ease-out; }
+.mp-switch button:hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, 0.08); }
+.mp-switch button[aria-pressed='true'] { background: #fff; color: var(--ink); }
+.mp-switch button:disabled { opacity: 0.4; cursor: not-allowed; }
+.mp-switch button:focus-visible { box-shadow: 0 0 0 3px rgba(246, 229, 154, 0.7); }
+@media (max-width: 900px) { .mp-switch { margin: 0; max-width: 320px; } }

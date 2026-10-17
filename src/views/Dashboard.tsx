@@ -5,29 +5,31 @@ import { Icon, Plies, Ply, SOURCE_LABEL } from '../components/ui';
 import type { ProductStat, Summary } from '../lib/compute';
 import { dateLabel, monthLabel, num, pct, rp, rpShort } from '../lib/format';
 import type { Insight } from '../lib/insights';
+import type { MarketplaceInfo } from '../lib/marketplace';
 import type { Source } from '../lib/types';
 
 type Stage = 'order' | 'income' | 'ads' | 'hpp' | 'other';
 
 interface Props {
+  M: MarketplaceInfo;
   summary: Summary;
   insights: Insight[];
   toolbar: ReactNode;
   goTo: (t: Tab) => void;
 }
 
-export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
+export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
   const [open, setOpen] = useState<Stage | null>(null);
   const loss = s.profit < 0;
   const period = s.month === 'all' ? 'semua bulan' : monthLabel(s.month);
 
   const costs = [
     { key: 'ads', label: 'Biaya iklan', value: s.ads, color: 'var(--ads-ink)', source: 'ads' as Source },
-    { key: 'admin', label: 'Administrasi', value: s.fees.admin, color: '#a8324f', source: 'income' as Source },
-    { key: 'service', label: 'Layanan', value: s.fees.service, color: '#c4506d', source: 'income' as Source },
-    { key: 'shipping', label: 'Ongkir ditanggung', value: s.fees.shipping, color: '#d6718b', source: 'income' as Source },
-    { key: 'ams', label: 'Komisi AMS', value: s.fees.ams, color: '#e293a7', source: 'income' as Source },
-    { key: 'processing', label: 'Proses pesanan', value: s.fees.processing, color: '#ebb1c0', source: 'income' as Source },
+    { key: 'admin', label: M.fees.admin, value: s.fees.admin, color: '#a8324f', source: 'income' as Source },
+    { key: 'service', label: M.fees.service, value: s.fees.service, color: '#c4506d', source: 'income' as Source },
+    { key: 'shipping', label: M.fees.shipping, value: s.fees.shipping, color: '#d6718b', source: 'income' as Source },
+    { key: 'ams', label: M.fees.ams, value: s.fees.ams, color: '#e293a7', source: 'income' as Source },
+    { key: 'processing', label: M.fees.processing, value: s.fees.processing, color: '#ebb1c0', source: 'income' as Source },
     { key: 'voucher', label: 'Voucher penjual', value: s.voucher, color: '#f2cbd5', source: 'income' as Source },
     { key: 'other', label: 'Lainnya', value: s.other, color: '#f7dfe6', source: 'income' as Source },
   ].sort((a, b) => b.value - a.value);
@@ -41,11 +43,11 @@ export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
 
   const stages: { id: Stage; source: Source; label: string; value: number; hint: string }[] = [
     { id: 'order', source: 'order', label: 'Omzet', value: s.omzet, hint: `${num(s.orders)} pesanan · ${num(s.qty)} pcs` },
-    { id: 'income', source: 'income', label: 'Potongan Shopee + voucher', value: -(s.marketplace + s.voucher), hint: `${pct((s.marketplace + s.voucher) / (s.omzet || 1))} dari omzet` },
+    { id: 'income', source: 'income', label: s.voucher > 0 ? `${M.cutLabel} + voucher` : M.cutLabel, value: -(s.marketplace + s.voucher), hint: `${pct((s.marketplace + s.voucher) / (s.omzet || 1))} dari omzet` },
     { id: 'ads', source: 'ads', label: 'Biaya iklan', value: -s.ads, hint: s.hasAds ? `${pct(s.ads / (s.omzet || 1))} dari omzet` : 'File iklan belum diupload' },
     { id: 'hpp', source: 'hpp', label: s.hppEstimated ? `HPP + estimasi ${s.missingHpp.length} produk` : 'HPP', value: -(s.hppKnown + s.hppEstimated), hint: `${pct((s.hppKnown + s.hppEstimated) / (s.omzet || 1))} dari omzet` },
     { id: 'other', source: 'income', label: 'Biaya lainnya', value: -s.other, hint: 'Premi, transaksi, kampanye' },
-  ];
+  ].filter((st) => st.id !== 'other' || s.other > 0) as typeof stages;
 
   return (
     <>
@@ -66,7 +68,7 @@ export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
           </h2>
           <p className={`verdict-figure num ${loss ? 'loss' : 'gain'}`}>{rpShort(s.profit)}</p>
           <p className="verdict-line">
-            {loss ? <b>Rugi.</b> : <b>Untung.</b>} Margin <b className="num">{pct(s.margin)}</b>. Shopee mencatat Total Penghasilan <b className="num">{rpShort(s.payout)}</b>, tapi setelah iklan dan HPP yang tersisa {rpShort(s.profit)}. Biaya terbesar: {biggest.label === 'HPP' ? 'HPP' : biggest.label.toLowerCase()} ({pct(biggest.value / (s.omzet || 1), 0)} dari omzet).
+            {loss ? <b>Rugi.</b> : <b>Untung.</b>} Margin <b className="num">{pct(s.margin)}</b>. {M.name} mencatat {M.payoutLabel} <b className="num">{rpShort(s.payout)}</b>, tapi setelah iklan dan HPP yang tersisa {rpShort(s.profit)}. Biaya terbesar: {biggest.label === 'HPP' ? 'HPP' : biggest.label.toLowerCase()} ({pct(biggest.value / (s.omzet || 1), 0)} dari omzet).
           </p>
           <div className="verdict-meta">
             <span className={`score ${s.health.label}`}>
@@ -124,7 +126,7 @@ export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
             <span className="hint">Margin {pct(s.margin)}</span>
           </div>
         </div>
-        {open && <Trace stage={open} summary={s} onClose={() => setOpen(null)} />}
+        {open && <Trace M={M} stage={open} summary={s} onClose={() => setOpen(null)} />}
       </section>
 
       <section className="panel" aria-labelledby="leak">
@@ -155,7 +157,7 @@ export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
         <WaterfallList
           steps={[
             { label: 'Omzet', value: s.omzet, total: true },
-            { label: 'Potongan Shopee', value: -s.marketplace },
+            { label: M.cutLabel, value: -s.marketplace },
             { label: 'Voucher', value: -s.voucher },
             { label: 'Iklan', value: -s.ads },
             { label: 'HPP', value: -s.hppKnown },
@@ -248,7 +250,7 @@ export function Dashboard({ summary: s, insights, toolbar, goTo }: Props) {
         <DailyLine data={s.daily} />
       </section>
 
-      <ProductTable products={s.products} />
+      <ProductTable M={M} products={s.products} />
     </>
   );
 }
@@ -277,7 +279,7 @@ function ProfitBars({ products }: { products: ProductStat[] }) {
 
 type SortKey = 'product' | 'qty' | 'sales' | 'marketplace' | 'ads' | 'hpp' | 'profit' | 'margin';
 
-function ProductTable({ products }: { products: ProductStat[] }) {
+function ProductTable({ M, products }: { M: MarketplaceInfo; products: ProductStat[] }) {
   const [key, setKey] = useState<SortKey>('profit');
   const [asc, setAsc] = useState(false);
   const sorted = useMemo(() => {
@@ -319,7 +321,7 @@ function ProductTable({ products }: { products: ProductStat[] }) {
               {head('product', 'Produk', false)}
               {head('qty', 'Terjual')}
               {head('sales', 'Sales')}
-              {head('marketplace', 'Potongan Shopee')}
+              {head('marketplace', M.cutLabel)}
               {head('ads', 'Iklan')}
               {head('hpp', 'HPP')}
               {head('profit', 'Profit')}
@@ -334,7 +336,7 @@ function ProductTable({ products }: { products: ProductStat[] }) {
                 </td>
                 <td className="r" data-label="Terjual">{num(p.qty)}</td>
                 <td className="r" data-label="Sales">{rp(p.sales)}</td>
-                <td className="r" data-label="Potongan Shopee">{rp(-(p.marketplace + p.voucher))}</td>
+                <td className="r" data-label={M.cutLabel}>{rp(-(p.marketplace + p.voucher))}</td>
                 <td className="r" data-label="Iklan">{rp(-p.ads)}</td>
                 <td className="r" data-label="HPP">
                   {rp(-p.hpp)}
@@ -353,7 +355,7 @@ function ProductTable({ products }: { products: ProductStat[] }) {
 
 const TRACE_LIMIT = 200;
 
-function Trace({ stage, summary: s, onClose }: { stage: Stage; summary: Summary; onClose: () => void }) {
+function Trace({ M, stage, summary: s, onClose }: { M: MarketplaceInfo; stage: Stage; summary: Summary; onClose: () => void }) {
   const source: Source = stage === 'other' ? 'income' : stage;
   let title = '';
   let body: ReactNode = null;
@@ -391,20 +393,23 @@ function Trace({ stage, summary: s, onClose }: { stage: Stage; summary: Summary;
     );
   } else if (stage === 'income' || stage === 'other') {
     const rows = stage === 'other' ? s.income.filter((r) => r.other > 0) : s.income;
+    const hasVoucher = s.voucher > 0;
+    const hasOther = s.other > 0;
     count = rows.length;
-    title = stage === 'other' ? `${num(rows.length)} pesanan dengan biaya lain-lain` : `${num(rows.length)} baris income: potongan ${rp(s.marketplace)} + voucher ${rp(s.voucher)}`;
+    title = stage === 'other' ? `${num(rows.length)} pesanan dengan biaya lain-lain` : `${num(rows.length)} baris income: potongan ${rp(s.marketplace)}${hasVoucher ? ` + voucher ${rp(s.voucher)}` : ''}`;
     body = (
       <table>
         <thead>
           <tr>
             <th>Baris</th>
             <th>No. pesanan</th>
-            <th className="r">Admin</th>
-            <th className="r">Layanan</th>
-            <th className="r">AMS</th>
+            <th className="r">{M.fees.admin}</th>
+            <th className="r">{M.fees.service}</th>
+            <th className="r">{M.fees.ams}</th>
+            <th className="r">{M.fees.processing}</th>
             <th className="r">Ongkir</th>
-            <th className="r">Voucher</th>
-            <th className="r">Lainnya</th>
+            {hasVoucher && <th className="r">Voucher</th>}
+            {hasOther && <th className="r">Lainnya</th>}
           </tr>
         </thead>
         <tbody>
@@ -415,9 +420,10 @@ function Trace({ stage, summary: s, onClose }: { stage: Stage; summary: Summary;
               <td className="r">{rp(-r.admin)}</td>
               <td className="r">{rp(-r.service)}</td>
               <td className="r">{rp(-r.ams)}</td>
+              <td className="r">{rp(-r.processing)}</td>
               <td className="r">{rp(-r.shipping)}</td>
-              <td className="r">{rp(-r.voucher)}</td>
-              <td className="r">{rp(-r.other)}</td>
+              {hasVoucher && <td className="r">{rp(-r.voucher)}</td>}
+              {hasOther && <td className="r">{rp(-r.other)}</td>}
             </tr>
           ))}
         </tbody>

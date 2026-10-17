@@ -2,11 +2,12 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { Notice, Ply, Stat } from '../components/ui';
 import type { MonthFilter, Summary } from '../lib/compute';
 import { dateLabel, num, rp } from '../lib/format';
+import type { MarketplaceInfo } from '../lib/marketplace';
 import type { Dataset } from '../lib/types';
 
 const PAGE = 50;
 
-export function OrderIncome({ data, summary, month, toolbar }: { data: Dataset; summary: Summary; month: MonthFilter; toolbar: ReactNode }) {
+export function OrderIncome({ M, data, summary, month, toolbar }: { M: MarketplaceInfo; data: Dataset; summary: Summary; month: MonthFilter; toolbar: ReactNode }) {
   const [q, setQ] = useState('');
   const [showCancelled, setShowCancelled] = useState(false);
   const [orderLimit, setOrderLimit] = useState(PAGE);
@@ -46,7 +47,7 @@ export function OrderIncome({ data, summary, month, toolbar }: { data: Dataset; 
 
       {summary.unsettled.length > 0 && (
         <Notice tone="info">
-          {num(new Set(summary.unsettled.map((u) => u.orderNo)).size)} pesanan belum ada di file income (dana belum dilepas). Biaya Shopee untuk pesanan itu belum ikut terhitung.
+          {num(new Set(summary.unsettled.map((u) => u.orderNo)).size)} pesanan belum ada di file income (dana belum dilepas). Biaya {M.name} untuk pesanan itu belum ikut terhitung.
         </Notice>
       )}
       {summary.orphanIncome.length > 0 && <Notice tone="warn">{num(summary.orphanIncome.length)} baris income tidak punya pesanan di file order. Mungkin file order belum mencakup bulan itu.</Notice>}
@@ -105,18 +106,18 @@ export function OrderIncome({ data, summary, month, toolbar }: { data: Dataset; 
       </section>
 
       <dl className="stats">
-        <Stat source="income" label="Total penghasilan" value={rp(summary.payout)} href="#t-income" />
-        <Stat source="income" label="Biaya administrasi" value={rp(f.admin)} href="#t-income" />
-        <Stat source="income" label="Biaya layanan" value={rp(f.service)} href="#t-income" />
-        <Stat source="income" label="Komisi AMS" value={rp(f.ams)} href="#t-income" />
-        <Stat source="income" label="Proses pesanan" value={rp(f.processing)} href="#t-income" />
+        <Stat source="income" label={M.payoutLabel} value={rp(summary.payout)} href="#t-income" />
+        <Stat source="income" label={M.fees.admin} value={rp(f.admin)} href="#t-income" />
+        <Stat source="income" label={M.fees.service} value={rp(f.service)} href="#t-income" />
+        <Stat source="income" label={M.fees.ams} value={rp(f.ams)} href="#t-income" />
+        <Stat source="income" label={M.fees.processing} value={rp(f.processing)} href="#t-income" />
         <Stat source="income" label="Ongkir ditanggung" value={rp(f.shipping)} href="#t-income" />
       </dl>
 
       <section className="panel panel-flush" aria-labelledby="t-income">
         <div className="panel-head">
           <h2 id="t-income">
-            Pratinjau income <Ply source="income" />
+            Pratinjau {M.id === 'tiktok' ? 'penyelesaian' : 'income'} <Ply source="income" />
           </h2>
           <p className="num">{num(income.length)} pesanan sudah dilepas</p>
         </div>
@@ -126,13 +127,13 @@ export function OrderIncome({ data, summary, month, toolbar }: { data: Dataset; 
               <tr>
                 <th>No. pesanan</th>
                 <th>Dana dilepas</th>
-                <th className="r">Administrasi</th>
-                <th className="r">Layanan</th>
-                <th className="r">Komisi AMS</th>
-                <th className="r">Proses</th>
+                <th className="r">{M.fees.admin}</th>
+                <th className="r">{M.fees.service}</th>
+                <th className="r">{M.fees.ams}</th>
+                <th className="r">{M.fees.processing}</th>
                 <th className="r">Ongkir</th>
                 <th className="r">Voucher</th>
-                <th className="r">Penghasilan</th>
+                <th className="r">{M.payoutLabel}</th>
               </tr>
             </thead>
             <tbody>
@@ -164,7 +165,9 @@ export function OrderIncome({ data, summary, month, toolbar }: { data: Dataset; 
         )}
       </section>
 
-      <p className="muted">Ada sel kosong di beberapa kolom? Itu wajar: Shopee mengganti nama sejumlah kolom mulai laporan Juli 2026, jadi file lama dan baru punya kolom berbeda. Profit Toko membaca keduanya.</p>
+      {M.id === 'shopee' && (
+        <p className="muted">Ada sel kosong di beberapa kolom? Itu wajar: Shopee mengganti nama sejumlah kolom mulai laporan Juli 2026, jadi file lama dan baru punya kolom berbeda. Profit Toko membaca keduanya.</p>
+      )}
     </>
   );
 }

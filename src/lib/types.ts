@@ -1,3 +1,5 @@
+import type { Marketplace } from './marketplace';
+
 // Where a number came from. Each source has its own ply colour in the UI.
 export type Source = 'order' | 'income' | 'ads' | 'hpp';
 
@@ -55,8 +57,9 @@ export interface Dataset {
   ads: AdRow[];
   files: Partial<Record<'order' | 'income' | 'ads', FileMeta>>;
   sample: boolean;
+  marketplace: Marketplace | null; // set by the first order or income file
 }
 
 export type HppMap = Record<string, number>;
 
-export const emptyDataset: Dataset = { orders: [], income: [], ads: [], files: {}, sample: false };
+export const emptyDataset: Dataset = { orders: [], income: [], ads: [], files: {}, sample: false, marketplace: null };

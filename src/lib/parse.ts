@@ -1,12 +1,13 @@
 import * as XLSX from 'xlsx';
 import { monthKey } from './format';
+import type { Marketplace } from './marketplace';
 import type { AdRow, FileMeta, HppMap, IncomeRow, OrderLine } from './types';
 
 export type FileKind = 'order' | 'income' | 'ads' | 'hpp';
 
 export type ParsedFile =
-  | { kind: 'order'; rows: OrderLine[]; meta: FileMeta }
-  | { kind: 'income'; rows: IncomeRow[]; meta: FileMeta }
+  | { kind: 'order'; rows: OrderLine[]; meta: FileMeta; marketplace: Marketplace }
+  | { kind: 'income'; rows: IncomeRow[]; meta: FileMeta; marketplace: Marketplace }
   | { kind: 'ads'; rows: AdRow[]; meta: FileMeta }
   | { kind: 'hpp'; hpp: HppMap; meta: FileMeta };
 
@@ -44,10 +45,10 @@ const INCOME_VOUCHER = ['voucherdisponsorolehpenjual', 'vouchercofunddisponsorol
 const INCOME_OTHER = ['premi', 'biayaprogramhematbiayakirim', 'biayatransaksi', 'biayakampanye', 'biayaisisaldootomatis', 'pengembaliandana', 'jumlahpengembaliandanakepembeli'];
 
 const ADS_COLS = {
-  date: ['tanggal', 'date', 'hari', 'waktu'],
+  date: ['tanggal', 'date', 'bydate', 'hari', 'waktu'],
   spend: ['biaya', 'biayaiklan', 'pengeluaran', 'spend', 'cost'],
-  gmv: ['penjualanlangsunggmv', 'gmv', 'omzetiklan', 'penjualan', 'penjualanlangsung'],
-  campaign: ['namaiklan', 'iklan', 'campaign', 'namakampanye'],
+  gmv: ['penjualanlangsunggmv', 'gmv', 'grossrevenue', 'pendapatankotor', 'omzetiklan', 'penjualan', 'penjualanlangsung'],
+  campaign: ['namaiklan', 'iklan', 'campaign', 'campaignname', 'namakampanye'],
   product: ['namaproduk', 'produk', 'productname'],
 };
 
@@ -55,7 +56,7 @@ const ADS_COLS = {
 export function toNumber(v: Cell): number {
   if (typeof v === 'number') return Number.isFinite(v) ? v : 0;
   if (v === null || v === undefined || v === '' || typeof v === 'boolean' || v instanceof Date) return 0;
-  let s = String(v).trim().replace(/rp/i, '').replace(/\s/g, '').replace('−', '-');
+  let s = String(v).trim().replace(/rp|idr/i, '').replace(/\s/g, '').replace('−', '-');
   if (!s || s === '-') return 0;
   const negative = s.startsWith('(') && s.endsWith(')');
   s = s.replace(/[()]/g, '');
@@ -112,8 +113,10 @@ function columnMap<T extends Record<string, string[]>>(header: string[], spec: T
 const cell = (row: Row, i: number): Cell => (i >= 0 ? row[i] : undefined);
 const text = (row: Row, i: number) => String(cell(row, i) ?? '').trim();
 
-function readSheets(buf: ArrayBuffer): Row[][] {
-  const wb = XLSX.read(buf, { type: 'array', cellDates: true });
+function readSheets(buf: ArrayBuffer, csv: boolean): Row[][] {
+  // CSV is read as plain text: SheetJS would otherwise turn 18-digit TikTok order IDs
+  // into floats and read dd/mm/yyyy dates as US mm/dd.
+  const wb = XLSX.read(buf, csv ? { type: 'array', raw: true } : { type: 'array', cellDates: true });
   return wb.SheetNames.map((n) => XLSX.utils.sheet_to_json<Row>(wb.Sheets[n], { header: 1, raw: true, defval: null }));
 }
 
@@ -132,7 +135,7 @@ function parseOrders(rows: Row[], h: number, name: string): ParsedFile {
     const r = rows[i];
     const orderNo = text(r, c.orderNo);
     const product = text(r, c.product);
-    if (!orderNo || !product) continue;
+    if (!orderNo || !product || !/\d/.test(orderNo)) continue;
     const date = toDate(cell(r, c.date)) ?? new Date(NaN);
     const status = text(r, c.status);
     const unitOriginal = toNumber(cell(r, c.unitOriginal));
@@ -153,7 +156,7 @@ function parseOrders(rows: Row[], h: number, name: string): ParsedFile {
       row: i + 1,
     });
   }
-  return { kind: 'order', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.date)), warnings } };
+  return { kind: 'order', marketplace: 'shopee', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.date)), warnings } };
 }
 
 function parseIncome(rows: Row[], h: number, name: string): ParsedFile {
@@ -186,7 +189,7 @@ function parseIncome(rows: Row[], h: number, name: string): ParsedFile {
       row: i + 1,
     });
   }
-  return { kind: 'income', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.settled)), warnings } };
+  return { kind: 'income', marketplace: 'shopee', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.settled)), warnings } };
 }
 
 function parseAds(rows: Row[], h: number, name: string): ParsedFile {
@@ -226,12 +229,120 @@ function parseHpp(rows: Row[], h: number, name: string): ParsedFile {
   return { kind: 'hpp', hpp, meta: { name, rows: Object.keys(hpp).length, months: [], warnings: [] } };
 }
 
+// ---------- TikTok Shop (incl. Tokopedia stores moved to TikTok Shop Seller Center) ----------
+// Exports come in English or Indonesian depending on the Seller Center language.
+
+const TT_ORDER_ID = ['orderid', 'idpesanan'];
+const TT_ORDER_COLS = {
+  orderNo: TT_ORDER_ID,
+  status: ['orderstatus', 'statuspesanan'],
+  date: ['createdtime', 'waktudibuat', 'waktupesanandibuat', 'paidtime', 'waktupembayaran'],
+  product: ['productname', 'namaproduk'],
+  variant: ['variation', 'variasi'],
+  qty: ['quantity', 'jumlah', 'kuantitas'],
+  unitOriginal: ['skuunitoriginalprice', 'hargasatuanaslisku', 'hargaaslisatuansku', 'hargaasli'],
+  subtotalAfter: ['skusubtotalafterdiscount', 'subtotalskusetelahdiskon'],
+  subtotalBefore: ['skusubtotalbeforediscount', 'subtotalskusebelumdiskon'],
+  payment: ['paymentmethod', 'metodepembayaran'],
+  buyer: ['buyerusername', 'namapenggunapembeli', 'usernamepembeli', 'username'],
+};
+const TT_SKU_MARKERS = ['skuid', 'idsku', 'sellersku', 'skupenjual', 'skusubtotalafterdiscount', 'subtotalskusetelahdiskon'];
+
+const TT_SETTLE_ID = ['orderadjustmentid', 'idpesananpenyesuaian', 'orderid', 'idpesanan'];
+const TT_PAYOUT = ['totalsettlementamount', 'jumlahpenyelesaiantotal', 'totalpenyelesaian', 'jumlahpenyelesaian'];
+const TT_SETTLE = {
+  orderNo: TT_SETTLE_ID,
+  settled: ['ordersettledtime', 'waktupenyelesaianpesanan', 'settledtime', 'waktupenyelesaian'],
+  payout: TT_PAYOUT,
+  sellerShipping: ['sellershippingfee', 'biayapengirimanpenjual'],
+};
+const TT_COMMISSION = ['tiktokshopcommissionfee', 'biayakomisitiktokshop', 'platformcommissionfee', 'biayakomisiplatform', 'dynamiccommission', 'komisidinamis'];
+const TT_SERVICE = ['sfpservicefee', 'biayalayanansfp', 'voucherxtraservicefee', 'biayalayananvoucherxtra', 'liveservicefee', 'biayalayananlive', 'bonuscashbackservicefee', 'biayalayananbonuscashback'];
+const TT_AFFILIATE = ['affiliatecommission', 'komisiafiliasi', 'affiliatepartnercommission', 'komisimitraafiliasi', 'affiliateshopadscommission', 'komisiiklantokoafiliasi'];
+const TT_TRANSACTION = ['transactionfee', 'biayatransaksi'];
+const TT_SHIPPING = ['actualshippingfee', 'biayapengirimanaktual', 'platformshippingfeediscount', 'diskonbiayapengirimanplatform', 'customershippingfee', 'biayapengirimanpelanggan', 'actualreturnshippingfee', 'biayapengirimanreturaktual'];
+
+function parseTiktokOrders(rows: Row[], h: number, name: string): ParsedFile {
+  const header = rows[h].map(norm);
+  const c = columnMap(header, TT_ORDER_COLS);
+  const warnings: string[] = [];
+  if (c.subtotalAfter < 0) warnings.push('Kolom subtotal SKU setelah diskon tidak ditemukan; harga asli dipakai.');
+  const out: OrderLine[] = [];
+  for (let i = h + 1; i < rows.length; i++) {
+    const r = rows[i];
+    const orderNo = text(r, c.orderNo);
+    const product = text(r, c.product);
+    // TikTok CSV exports put a row of column descriptions under the header.
+    if (!orderNo || !product || !/\d/.test(orderNo)) continue;
+    const qty = toNumber(cell(r, c.qty)) || 1;
+    const unitOriginal = toNumber(cell(r, c.unitOriginal)) || toNumber(cell(r, c.subtotalBefore)) / qty;
+    const after = toNumber(cell(r, c.subtotalAfter));
+    const date = toDate(cell(r, c.date)) ?? new Date(NaN);
+    const status = text(r, c.status);
+    out.push({
+      orderNo,
+      date,
+      month: Number.isNaN(date.getTime()) ? 'tanpa-tanggal' : monthKey(date),
+      status,
+      cancelled: /batal|cancel/i.test(status),
+      product,
+      variant: text(r, c.variant),
+      qty,
+      unitOriginal: unitOriginal || after / qty,
+      unitDiscounted: after ? after / qty : unitOriginal,
+      payment: text(r, c.payment) || 'Tidak diketahui',
+      buyer: text(r, c.buyer),
+      row: i + 1,
+    });
+  }
+  return { kind: 'order', marketplace: 'tiktok', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.date)), warnings } };
+}
+
+function parseTiktokSettlement(rows: Row[], h: number, name: string): ParsedFile {
+  const header = rows[h].map(norm);
+  const c = columnMap(header, TT_SETTLE);
+  const group = (aliases: string[]) => aliases.map((a) => header.indexOf(a)).filter((i) => i >= 0);
+  const commission = group(TT_COMMISSION);
+  const service = group(TT_SERVICE);
+  const affiliate = group(TT_AFFILIATE);
+  const transaction = group(TT_TRANSACTION);
+  const shipping = group(TT_SHIPPING);
+  const warnings: string[] = [];
+  if (!commission.length) warnings.push('Kolom komisi platform tidak ditemukan.');
+  const out: IncomeRow[] = [];
+  const costOf = (r: Row, cols: number[]) => cols.reduce((s, j) => s + Math.max(0, -toNumber(r[j])), 0);
+  for (let i = h + 1; i < rows.length; i++) {
+    const r = rows[i];
+    const orderNo = text(r, c.orderNo);
+    if (!orderNo || !/\d/.test(orderNo)) continue;
+    const shipNet = c.sellerShipping >= 0 ? toNumber(cell(r, c.sellerShipping)) : shipping.reduce((s, j) => s + toNumber(r[j]), 0);
+    out.push({
+      orderNo,
+      settled: toDate(cell(r, c.settled)),
+      admin: costOf(r, commission),
+      service: costOf(r, service),
+      ams: costOf(r, affiliate),
+      processing: costOf(r, transaction),
+      shipping: Math.max(0, -shipNet),
+      voucher: 0, // seller discounts are already inside the order's subtotal after discount
+      other: 0,
+      payout: toNumber(cell(r, c.payout)),
+      row: i + 1,
+    });
+  }
+  return { kind: 'income', marketplace: 'tiktok', rows: out, meta: { name, rows: out.length, months: months(out.map((o) => o.settled)), warnings } };
+}
+
 /** Reads one uploaded file and decides which Shopee report it is from its headers. */
 export async function parseFile(file: File): Promise<ParsedFile> {
-  const sheets = readSheets(await file.arrayBuffer());
+  const sheets = readSheets(await file.arrayBuffer(), /\.(csv|txt)$/i.test(file.name));
   for (const rows of sheets) {
-    let h = findHeader(rows, [['nopesanan', 'nomorpesanan', 'orderid', 'idpesanan'], ['totalpenghasilan', 'penghasilan', 'biayaadministrasi']]);
+    let h = findHeader(rows, [TT_SETTLE_ID, TT_PAYOUT]);
+    if (h >= 0) return parseTiktokSettlement(rows, h, file.name);
+    h = findHeader(rows, [['nopesanan', 'nomorpesanan', 'orderid', 'idpesanan'], ['totalpenghasilan', 'penghasilan', 'biayaadministrasi']]);
     if (h >= 0) return parseIncome(rows, h, file.name);
+    h = findHeader(rows, [TT_ORDER_ID, TT_SKU_MARKERS]);
+    if (h >= 0) return parseTiktokOrders(rows, h, file.name);
     h = findHeader(rows, [['nopesanan', 'nomorpesanan', 'orderid', 'idpesanan'], ORDER_COLS.product]);
     if (h >= 0) return parseOrders(rows, h, file.name);
     h = findHeader(rows, [['namaproduk', 'produk'], ['hppperunit', 'hpp', 'modal', 'hargapokok']]);
@@ -239,7 +350,7 @@ export async function parseFile(file: File): Promise<ParsedFile> {
     h = findHeader(rows, [ADS_COLS.spend]);
     if (h >= 0) return parseAds(rows, h, file.name);
   }
-  throw new Error(`${file.name}: kolom laporan Shopee tidak dikenali. Pastikan ini file Order, Income (Penghasilan) atau Iklan dari Seller Centre.`);
+  throw new Error(`${file.name}: kolom laporannya tidak dikenali. Pastikan ini file pesanan, penghasilan/penyelesaian, atau iklan dari Shopee atau TikTok Shop.`);
 }
 
 export function downloadHppTemplate(products: string[], hpp: HppMap) {
