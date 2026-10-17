@@ -1,0 +1,649 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-17T15:46:35.700833+00:00",
+  "title": "Design System: Profit Toko",
+  "extensions": {
+    "colorMeta": {
+      "carbon": {
+        "role": "primary",
+        "displayName": "Carbon Ink",
+        "canonical": "#1e2a78",
+        "tonalRamp": [
+          "#0f153d",
+          "#1b256a",
+          "#263597",
+          "#3145c4",
+          "#5c6cd6",
+          "#8d98e2",
+          "#bec4ef",
+          "#ebedfa"
+        ]
+      },
+      "carbon-deep": {
+        "role": "primary",
+        "displayName": "Carbon Deep",
+        "canonical": "#121a55",
+        "tonalRamp": [
+          "#0d133f",
+          "#17216d",
+          "#21309c",
+          "#2b3eca",
+          "#5766db",
+          "#8994e6",
+          "#bcc2f1",
+          "#eaecfb"
+        ]
+      },
+      "carbon-soft": {
+        "role": "primary",
+        "displayName": "Carbon Soft",
+        "canonical": "#c9cfee",
+        "tonalRamp": [
+          "#12193a",
+          "#202b65",
+          "#2d3d90",
+          "#3b4fba",
+          "#6475ce",
+          "#929edd",
+          "#c1c8eb",
+          "#eceef9"
+        ]
+      },
+      "carbon-mute": {
+        "role": "primary",
+        "displayName": "Carbon Mute",
+        "canonical": "#8f98d0",
+        "tonalRamp": [
+          "#171b36",
+          "#272f5d",
+          "#384285",
+          "#4856ac",
+          "#6f7bc3",
+          "#9aa2d5",
+          "#c6cae7",
+          "#edeef7"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#141b4d",
+        "tonalRamp": [
+          "#10153d",
+          "#1b2569",
+          "#273596",
+          "#3244c2",
+          "#5d6cd5",
+          "#8e98e2",
+          "#bec4ee",
+          "#ebedfa"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#3f4884",
+        "tonalRamp": [
+          "#191c34",
+          "#2b315a",
+          "#3d4680",
+          "#4f5aa6",
+          "#757ebd",
+          "#9ea5d1",
+          "#c8cce5",
+          "#eeeff7"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#5a628f",
+        "tonalRamp": [
+          "#1e202f",
+          "#333851",
+          "#494f74",
+          "#5f6796",
+          "#8289b0",
+          "#a7acc8",
+          "#cdd0df",
+          "#eff0f5"
+        ]
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Cool Ground",
+        "canonical": "#e9ebf4",
+        "tonalRamp": [
+          "#191e33",
+          "#2c3458",
+          "#3f4a7e",
+          "#5260a3",
+          "#7783bb",
+          "#a0a8cf",
+          "#c9cee4",
+          "#eef0f6"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#999999",
+          "#b8b8b8",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#dde1f0",
+        "tonalRamp": [
+          "#171e35",
+          "#29335c",
+          "#3a4983",
+          "#4b5faa",
+          "#7182c1",
+          "#9ca8d3",
+          "#c6cde6",
+          "#edeff7"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Line Strong",
+        "canonical": "#b6bcdd",
+        "tonalRamp": [
+          "#181d34",
+          "#2a325a",
+          "#3c4781",
+          "#4e5ca7",
+          "#747fbe",
+          "#9ea6d2",
+          "#c7cce5",
+          "#eeeff7"
+        ]
+      },
+      "ply-order": {
+        "role": "secondary",
+        "displayName": "Order White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5e5e5e",
+          "#7a7a7a",
+          "#999999",
+          "#b8b8b8",
+          "#d6d6d6",
+          "#f2f2f2"
+        ]
+      },
+      "ply-order-edge": {
+        "role": "secondary",
+        "displayName": "Order Edge",
+        "canonical": "#c3c8e2",
+        "tonalRamp": [
+          "#191d34",
+          "#2b3359",
+          "#3d487f",
+          "#505ea5",
+          "#7581bd",
+          "#9fa7d0",
+          "#c8cde4",
+          "#eeeff7"
+        ]
+      },
+      "ply-income": {
+        "role": "secondary",
+        "displayName": "Income Pink",
+        "canonical": "#f6d3dd",
+        "tonalRamp": [
+          "#a8324f",
+          "#c4506d",
+          "#d6718b",
+          "#e293a7",
+          "#ebb1c0",
+          "#f2cbd5",
+          "#f7dfe6",
+          "#fbeaf0"
+        ],
+        "note": "Ramp is the build's own fee share-bar scale (Dashboard), ending at the income wash."
+      },
+      "ply-income-wash": {
+        "role": "secondary",
+        "displayName": "Income Wash",
+        "canonical": "#fbeaf0",
+        "tonalRamp": [
+          "#400c1f",
+          "#6f1535",
+          "#9f1e4b",
+          "#ce2762",
+          "#de5485",
+          "#e887a9",
+          "#f2bace",
+          "#fbeaf0"
+        ]
+      },
+      "ply-income-edge": {
+        "role": "secondary",
+        "displayName": "Income Edge",
+        "canonical": "#e2aebd",
+        "tonalRamp": [
+          "#38141f",
+          "#622335",
+          "#8b324b",
+          "#b44162",
+          "#c96985",
+          "#d996a9",
+          "#e9c3ce",
+          "#f8ecf0"
+        ]
+      },
+      "ply-ads": {
+        "role": "secondary",
+        "displayName": "Iklan Yellow",
+        "canonical": "#f6e59a",
+        "tonalRamp": [
+          "#463a06",
+          "#7a650b",
+          "#ad900f",
+          "#e1bb14",
+          "#eecf44",
+          "#f3dd7c",
+          "#f8ecb4",
+          "#fdf9e8"
+        ]
+      },
+      "ply-ads-wash": {
+        "role": "secondary",
+        "displayName": "Iklan Wash",
+        "canonical": "#fbf3cc",
+        "tonalRamp": [
+          "#473c06",
+          "#7b680a",
+          "#af940e",
+          "#e3bf12",
+          "#f0d242",
+          "#f5e07b",
+          "#f9edb3",
+          "#fdf9e7"
+        ]
+      },
+      "ply-ads-edge": {
+        "role": "secondary",
+        "displayName": "Iklan Edge",
+        "canonical": "#dcc562",
+        "tonalRamp": [
+          "#3f350e",
+          "#6c5d18",
+          "#9a8422",
+          "#c8ab2d",
+          "#dac158",
+          "#e5d48a",
+          "#f0e6bc",
+          "#faf7ea"
+        ]
+      },
+      "ply-hpp": {
+        "role": "secondary",
+        "displayName": "HPP Pale Blue",
+        "canonical": "#dce3f7",
+        "tonalRamp": [
+          "#0e1b3e",
+          "#192e6c",
+          "#23429a",
+          "#2e55c7",
+          "#597ad9",
+          "#8ba2e4",
+          "#bdcaf0",
+          "#eaeefa"
+        ]
+      },
+      "ply-hpp-wash": {
+        "role": "secondary",
+        "displayName": "HPP Wash",
+        "canonical": "#eef1fb",
+        "tonalRamp": [
+          "#0f193e",
+          "#192c6b",
+          "#243f99",
+          "#2f52c6",
+          "#5a77d8",
+          "#8ba0e4",
+          "#bdc9ef",
+          "#eaeefa"
+        ]
+      },
+      "ply-hpp-edge": {
+        "role": "secondary",
+        "displayName": "HPP Edge",
+        "canonical": "#b3bfe6",
+        "tonalRamp": [
+          "#131c3a",
+          "#213164",
+          "#2f458e",
+          "#3d5ab8",
+          "#657ecd",
+          "#94a5dc",
+          "#c2cbeb",
+          "#eceff9"
+        ]
+      },
+      "loss": {
+        "role": "tertiary",
+        "displayName": "Loss Red",
+        "canonical": "#b3123a",
+        "tonalRamp": [
+          "#460717",
+          "#780c27",
+          "#ab1138",
+          "#de1648",
+          "#ec466f",
+          "#f27d9a",
+          "#f8b5c5",
+          "#fde8ed"
+        ]
+      },
+      "loss-wash": {
+        "role": "tertiary",
+        "displayName": "Loss Wash",
+        "canonical": "#fbe7ec",
+        "tonalRamp": [
+          "#420b19",
+          "#72132b",
+          "#a21b3d",
+          "#d2234f",
+          "#e25075",
+          "#eb859e",
+          "#f3b9c8",
+          "#fbe9ee"
+        ]
+      },
+      "gain": {
+        "role": "tertiary",
+        "displayName": "Gain Green",
+        "canonical": "#15703f",
+        "tonalRamp": [
+          "#0c4024",
+          "#15703f",
+          "#1e9f59",
+          "#27ce74",
+          "#53df94",
+          "#87e8b4",
+          "#baf2d4",
+          "#eafbf2"
+        ]
+      },
+      "gain-wash": {
+        "role": "tertiary",
+        "displayName": "Gain Wash",
+        "canonical": "#e3f3ea",
+        "tonalRamp": [
+          "#173624",
+          "#285d3f",
+          "#39845a",
+          "#49ab74",
+          "#70c294",
+          "#9bd4b4",
+          "#c6e7d4",
+          "#edf7f2"
+        ]
+      },
+      "warn": {
+        "role": "tertiary",
+        "displayName": "Warn Amber",
+        "canonical": "#8a5a00",
+        "tonalRamp": [
+          "#4c3200",
+          "#855600",
+          "#bd7b00",
+          "#f5a000",
+          "#ffb833",
+          "#ffcd70",
+          "#ffe3ad",
+          "#fff6e5"
+        ]
+      },
+      "warn-wash": {
+        "role": "tertiary",
+        "displayName": "Warn Wash",
+        "canonical": "#fff3d6",
+        "tonalRamp": [
+          "#4c3600",
+          "#855e00",
+          "#bd8500",
+          "#f5ad00",
+          "#ffc333",
+          "#ffd570",
+          "#ffe7ad",
+          "#fff8e5"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Verdict figure",
+        "purpose": "Profit real figure only; 2.5rem at ≤560px."
+      },
+      "headline": {
+        "displayName": "Page title",
+        "purpose": "One per tab."
+      },
+      "figure": {
+        "displayName": "Stage figure",
+        "purpose": "Stage card values."
+      },
+      "title": {
+        "displayName": "Panel title",
+        "purpose": "Panel and section headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Tables, verdict sentence, diagnoses, notices."
+      },
+      "body-sm": {
+        "displayName": "Meta",
+        "purpose": "Sub-lines, panel descriptions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Table headers, stat labels, rail notes; sentence case."
+      },
+      "ply-chip": {
+        "displayName": "Ply chip",
+        "purpose": "Source chip text only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel-ambient",
+        "value": "0 1px 2px rgba(20,27,77,0.08), 0 8px 24px rgba(20,27,77,0.06)",
+        "purpose": "Panels, insight cards, empty state."
+      },
+      {
+        "name": "hover-lift",
+        "value": "0 6px 16px rgba(20,27,77,0.1)",
+        "purpose": "Clickable stage cards and linked stat tiles, with translateY(-2px)."
+      },
+      {
+        "name": "selected-outline",
+        "value": "0 0 0 2px #1e2a78",
+        "purpose": "Open stage card."
+      },
+      {
+        "name": "focus",
+        "value": "0 0 0 3px rgba(30,42,120,0.35)",
+        "purpose": "Focus ring; rail uses 0 0 0 3px rgba(246,229,154,0.7)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-lift",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Card lift (180ms) and trace reveal (260ms clip-path from top)."
+      },
+      {
+        "name": "ease-state",
+        "value": "150ms ease-out",
+        "purpose": "Colour and border state changes."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "1ms",
+        "purpose": "All animation and transition durations under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "rail-collapse",
+        "value": "900px"
+      },
+      {
+        "name": "ledger-stack",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action: upload, next step.",
+      "html": "<button class=\"ds-btn ds-btn-primary\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 16V4m0 0L7 9m5-5 5 5M5 20h14\"/></svg>Upload data</button>",
+      "css": ".ds-btn{font-family:'Public Sans',system-ui,sans-serif;height:40px;padding:0 16px;border-radius:6px;border:1px solid transparent;font-size:.875rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:background-color 150ms ease-out,border-color 150ms ease-out}.ds-btn-primary{background:#1e2a78;color:#fff}.ds-btn-primary:hover{background:#121a55}.ds-btn:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Alternate action beside a primary, e.g. use sample data.",
+      "html": "<button class=\"ds-btn-secondary\">Pakai data contoh</button>",
+      "css": ".ds-btn-secondary{font-family:'Public Sans',system-ui,sans-serif;height:40px;padding:0 16px;border-radius:6px;border:1px solid #b6bcdd;background:#fff;color:#1e2a78;font-size:.875rem;font-weight:600;cursor:pointer;transition:border-color 150ms ease-out}.ds-btn-secondary:hover{border-color:#1e2a78}.ds-btn-secondary:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}"
+    },
+    {
+      "name": "HPP Input",
+      "kind": "input",
+      "refersTo": "input-hpp-empty",
+      "description": "Right-aligned cost field; yellow wash while empty.",
+      "html": "<input class=\"ds-input ds-input-hpp is-empty\" placeholder=\"Rp\" />",
+      "css": ".ds-input{font-family:'Public Sans',system-ui,sans-serif;height:40px;padding:0 12px;border:1px solid #b6bcdd;border-radius:6px;background:#fff;color:#141b4d;font-size:.875rem}.ds-input:hover{border-color:#1e2a78}.ds-input:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}.ds-input-hpp{width:128px;text-align:right;font-variant-numeric:tabular-nums}.ds-input-hpp.is-empty{background:#fbf3cc;border-color:#dcc562}"
+    },
+    {
+      "name": "Ply Chips",
+      "kind": "chip",
+      "refersTo": "ply-chip-income",
+      "description": "Names the source file of a figure.",
+      "html": "<span class=\"ds-chips\"><span class=\"ds-muted\">Dihitung dari</span><span class=\"ds-ply o\">Order</span><span class=\"ds-ply i\">Income</span><span class=\"ds-ply a\">Iklan</span><span class=\"ds-ply h\">HPP</span></span>",
+      "css": ".ds-chips{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;gap:6px;align-items:center}.ds-muted{font-size:.8125rem;color:#5a628f}.ds-ply{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;letter-spacing:.02em;border:1px solid;color:#141b4d}.ds-ply.o{background:#fff;border-color:#c3c8e2}.ds-ply.i{background:#f6d3dd;border-color:#e2aebd}.ds-ply.a{background:#f6e59a;border-color:#dcc562}.ds-ply.h{background:#dce3f7;border-color:#b3bfe6}"
+    },
+    {
+      "name": "Rail Navigation",
+      "kind": "nav",
+      "refersTo": "rail",
+      "description": "Carbon rail with numbered steps and the fanned file-ply stack.",
+      "html": "<nav class=\"ds-rail\"><strong>Profit Toko</strong><button class=\"ds-step\"><span>1</span>Panduan</button><button class=\"ds-step\" aria-current=\"page\"><span>5</span>Dashboard profit</button><div class=\"ds-stack\"><div class=\"o\"><b>Order</b><span>160 baris</span></div><div class=\"i\"><b>Income</b><span>126 baris</span></div><div class=\"a\"><b>Iklan</b><span>233 baris</span></div></div></nav>",
+      "css": ".ds-rail{font-family:'Public Sans',system-ui,sans-serif;background:#1e2a78;color:#c9cfee;padding:24px 16px;width:248px;display:flex;flex-direction:column;gap:4px}.ds-rail strong{color:#fff;font-weight:800;margin-bottom:16px}.ds-step{font-family:'Public Sans',system-ui,sans-serif;display:flex;gap:10px;align-items:center;padding:10px 8px;border:0;border-radius:6px;background:transparent;color:#c9cfee;font-size:.875rem;text-align:left;cursor:pointer;transition:background-color 150ms ease-out}.ds-step span{width:18px;color:#8f98d0}.ds-step:hover{background:rgba(255,255,255,.08);color:#fff}.ds-step[aria-current=page]{background:#f6e59a;color:#141b4d;font-weight:700}.ds-step[aria-current=page] span{color:#141b4d}.ds-step:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(246,229,154,.7)}.ds-stack{margin-top:24px;display:flex;flex-direction:column}.ds-stack div{display:flex;justify-content:space-between;padding:9px 12px;font-size:.75rem;color:#141b4d}.ds-stack span{color:#5a628f}.ds-stack .o{background:#fff;border-radius:6px 6px 0 0}.ds-stack .i{background:#f6d3dd;margin-left:4px}.ds-stack .a{background:#f6e59a;margin-left:8px;border-radius:0 0 6px 6px}"
+    },
+    {
+      "name": "Stage Cards",
+      "kind": "custom",
+      "refersTo": "stage-card-income",
+      "description": "Signature: ply-tinted stage figures ending in the carbon result card; clicking opens the trace.",
+      "html": "<div class=\"ds-stages\"><button class=\"ds-stage i\" aria-expanded=\"false\"><span class=\"ds-ply\">Income</span><span class=\"l\">Potongan Shopee</span><span class=\"v\">−Rp4,1 jt</span><span class=\"h\">17,8% dari omzet</span></button><button class=\"ds-stage a\" aria-expanded=\"true\"><span class=\"ds-ply\">Iklan</span><span class=\"l\">Biaya iklan</span><span class=\"v\">−Rp4,7 jt</span><span class=\"h\">20,2% dari omzet</span></button><div class=\"ds-stage r\"><span class=\"l\">Profit real</span><span class=\"v\">−Rp1,0 jt</span><span class=\"h\">Margin −4,4%</span></div></div>",
+      "css": ".ds-stages{font-family:'Public Sans',system-ui,sans-serif;display:grid;grid-template-columns:repeat(3,168px);gap:12px;color:#141b4d}.ds-stage{font-family:'Public Sans',system-ui,sans-serif;text-align:left;border:1px solid;border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:8px;cursor:pointer;color:inherit;font-variant-numeric:tabular-nums;transition:transform 180ms cubic-bezier(.2,.8,.2,1),box-shadow 180ms ease-out}.ds-stage:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,27,77,.1)}.ds-stage[aria-expanded=true]{box-shadow:0 0 0 2px #1e2a78}.ds-stage:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}.ds-stage .l{font-size:.8125rem;color:#3f4884}.ds-stage .v{font-size:1.375rem;font-weight:800;letter-spacing:-.01em}.ds-stage .h{font-size:.75rem;color:#5a628f}.ds-ply{align-self:flex-start;height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;border:1px solid;display:inline-flex;align-items:center}.ds-stage.i{background:#fbeaf0;border-color:#e2aebd}.ds-stage.i .ds-ply{background:#f6d3dd;border-color:#e2aebd}.ds-stage.a{background:#fbf3cc;border-color:#dcc562}.ds-stage.a .ds-ply{background:#f6e59a;border-color:#dcc562}.ds-stage.r{background:#1e2a78;border-color:#1e2a78;color:#fff;cursor:default}.ds-stage.r:hover{transform:none;box-shadow:none}.ds-stage.r .l,.ds-stage.r .h{color:#c9cfee}.ds-stage.r .v{color:#ffb3c4}"
+    },
+    {
+      "name": "Trace Panel",
+      "kind": "custom",
+      "refersTo": "trace-panel-ads",
+      "description": "Rows behind a stage figure, slid out in the same ply wash.",
+      "html": "<div class=\"ds-trace\"><div class=\"ds-th\"><h3><span class=\"ds-ply\">Iklan</span> 233 baris iklan, total Rp4.661.900</h3><button>Tutup</button></div><table><thead><tr><th>Tanggal</th><th>Iklan</th><th class=\"r\">Biaya</th></tr></thead><tbody><tr><td>31 Jul 2026</td><td>Iklan Wedang Rempah 700 Gram</td><td class=\"r\">−Rp24.200</td></tr><tr><td>31 Jul 2026</td><td>Iklan Matcha Powder 100 Gram</td><td class=\"r\">−Rp19.400</td></tr></tbody></table></div>",
+      "css": ".ds-trace{font-family:'Public Sans',system-ui,sans-serif;background:#fbf3cc;border:1px solid #dcc562;border-radius:8px;overflow:hidden;color:#141b4d;animation:ds-in 260ms cubic-bezier(.2,.8,.2,1)}@keyframes ds-in{from{clip-path:inset(0 0 100% 0);transform:translateY(-10px)}to{clip-path:inset(0 0 0 0);transform:none}}.ds-th{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}.ds-th h3{margin:0;font-size:.875rem;font-weight:700;display:flex;gap:8px;align-items:center}.ds-th button{font-family:'Public Sans',system-ui,sans-serif;border:0;background:none;color:#1e2a78;font-weight:600;cursor:pointer}.ds-th button:hover{text-decoration:underline}.ds-ply{height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;border:1px solid #dcc562;background:#f6e59a;display:inline-flex;align-items:center}.ds-trace table{width:100%;border-collapse:collapse;font-size:.875rem;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.6)}.ds-trace th{text-align:left;font-size:.75rem;font-weight:600;color:#5a628f;padding:10px 12px}.ds-trace td{padding:11px 12px;border-top:1px solid #dde1f0}.ds-trace .r{text-align:right}"
+    },
+    {
+      "name": "Stat Tile",
+      "kind": "card",
+      "refersTo": "stat-tile-income",
+      "description": "Single-source figure tile linking to its rows.",
+      "html": "<dl class=\"ds-stat\"><dt><a href=\"#\">Total penghasilan</a><span class=\"ds-ply\">Income</span></dt><dd class=\"v\">Rp17.885.212</dd><dd class=\"c\">Lihat baris →</dd></dl>",
+      "css": ".ds-stat{font-family:'Public Sans',system-ui,sans-serif;position:relative;margin:0;width:200px;background:#fbeaf0;border:1px solid #e2aebd;border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:2px;color:#141b4d;transition:transform 180ms cubic-bezier(.2,.8,.2,1),box-shadow 180ms ease-out}.ds-stat:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,27,77,.1)}.ds-stat dt{font-size:.75rem;color:#3f4884;display:flex;justify-content:space-between;align-items:center;gap:6px}.ds-stat a{color:inherit;text-decoration:none}.ds-stat a::after{content:'';position:absolute;inset:0;border-radius:8px}.ds-stat a:focus-visible{outline:none}.ds-stat a:focus-visible::after{box-shadow:0 0 0 3px rgba(30,42,120,.35)}.ds-stat .v{margin:0;font-size:1.125rem;font-weight:700;font-variant-numeric:tabular-nums}.ds-stat .c{margin:4px 0 0;font-size:.75rem;font-weight:600;color:#1e2a78}.ds-stat:hover .c{text-decoration:underline}.ds-ply{height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;border:1px solid #e2aebd;background:#f6d3dd;display:inline-flex;align-items:center}"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "White working panel on the cool ground.",
+      "html": "<section class=\"ds-panel\"><h2>Profit per produk</h2><p>Urut dari profit terendah.</p></section>",
+      "css": ".ds-panel{font-family:'Public Sans',system-ui,sans-serif;background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(20,27,77,.08),0 8px 24px rgba(20,27,77,.06);padding:24px;color:#141b4d;max-width:420px}.ds-panel h2{margin:0;font-size:1.125rem;font-weight:700;line-height:1.3}.ds-panel p{margin:4px 0 0;font-size:.8125rem;color:#5a628f}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Nota Rangkap (the three-ply carbon receipt book)",
+    "overview": "The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the binding and the writing, and a coloured ply for each copy. Here every source file is a ply. Order is the white top sheet, Income the pink copy, Iklan (ads) the yellow copy, HPP (the seller's own cost) the pale blue copy. Any figure, card, tile, file card, guide card or trace that comes from one file is tinted in that file's ply colour and carries a small ply chip naming it. Provenance is the decoration; there is no other ornament.\n\nDensity is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the stacked file plies, a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.",
+    "keyCharacteristics": [
+      "Carbon-blue rail and ink; cool blue-tinted ground (never warm paper).",
+      "Four ply colours used strictly as source codes, as a full fill (chips, rail plies) or a wash (cards, tiles, traces).",
+      "Public Sans throughout, weights 400 to 800, tabular numerals on every figure and table.",
+      "Stage card opens a trace panel of the rows that produced it, in the same ply wash.",
+      "Loss/gain colour is semantic only; the result card is solid carbon."
+    ],
+    "rules": [
+      {
+        "name": "The Ply Provenance Rule",
+        "body": "A ply colour means \"this came from that file\". Any figure derived from one source sits on that ply's wash and carries its chip; never use Income pink, Iklan yellow or HPP blue as decoration on unrelated content.",
+        "section": "colors"
+      },
+      {
+        "name": "The Carbon Result Rule",
+        "body": "The computed bottom line (Profit real) is never a ply: it sits on solid carbon, because it is the sum of all copies, not one of them.",
+        "section": "colors"
+      },
+      {
+        "name": "The Earned Red Rule",
+        "body": "Loss red and gain green appear only on signed figures, loss rows and state badges. A neutral total is ink or carbon.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Every number that can sit above another number uses tabular numerals (`font-variant-numeric: tabular-nums`); tables get it by default.",
+        "section": "typography"
+      },
+      {
+        "name": "The Sentence Case Rule",
+        "body": "Labels and headers stay in sentence case at 600 weight; the system has no uppercase tracked labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Stacked Ledger Rule",
+        "body": "Any table a seller must read per row on a phone stacks into labelled ledger lines at ≤560px; it does not scroll sideways.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat Ply Rule",
+        "body": "Ply-tinted sheets never carry the ambient shadow; their edge colour is their depth.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do tint any single-source figure, card or trace with its ply wash and edge, and add its ply chip.",
+      "Do keep the computed bottom line on solid carbon.",
+      "Do use tabular numerals for every rupiah and count.",
+      "Do stack per-row tables into labelled ledger lines at ≤560px (`table.ledger` with `data-label` cells).",
+      "Do express lift only on interaction: 2px rise plus hover shadow on clickable cards."
+    ],
+    "donts": [
+      "Don't use ply colours as decoration on content that has no source file.",
+      "Don't colour neutral totals red or green; loss and gain colours are reserved for signed values and states.",
+      "Don't put the panel ambient shadow on ply-tinted sheets.",
+      "Don't add uppercase tracked labels or eyebrow text above headings; labels stay sentence case.",
+      "Don't give Iklan yellow further non-source roles beyond the existing highlight uses (active step, selection, sample tag, empty input, warning rank)."
+    ]
+  }
+}
