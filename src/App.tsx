@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { allMonths, allProducts, summarize, type MonthFilter } from './lib/compute';
-import { monthLabel, num, prevMonth } from './lib/format';
-import { buildInsights } from './lib/insights';
-import { MARKETPLACES, type Marketplace } from './lib/marketplace';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { allMonths, allProducts, summarize, type MonthFilter, type StoreFilter } from './lib/compute';
+import { monthLabel, prevMonth } from './lib/format';
+import { buildInsights, buildStoreInsights } from './lib/insights';
+import { infoFor, MARKETPLACES, type Marketplace } from './lib/marketplace';
 import { parseFile } from './lib/parse';
-import { sampleDataset, sampleHpp } from './lib/sample';
-import { emptyDataset, type Dataset, type HppMap } from './lib/types';
-import { NoData } from './components/ui';
+import { sampleState } from './lib/sample';
+import { clearState, loadState, saveState } from './lib/storage';
+import { emptyDataset, emptySettings, productId, type Dataset, type Settings, type Store } from './lib/types';
+import { NoData, StoreMark } from './components/ui';
 import { Guide } from './views/Guide';
 import { Upload } from './views/Upload';
 import { OrderIncome } from './views/OrderIncome';
@@ -21,19 +22,9 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'upload', label: 'Upload data' },
   { id: 'order', label: 'Order & Income' },
   { id: 'produk', label: 'Produk & HPP' },
-  { id: 'dashboard', label: 'Dashboard profit' },
+  { id: 'dashboard', label: 'Dashboard' },
   { id: 'insight', label: 'Insight & saran' },
 ];
-
-const HPP_KEY = 'profit-toko:hpp';
-
-function loadHpp(): HppMap {
-  try {
-    return JSON.parse(localStorage.getItem(HPP_KEY) ?? '{}') as HppMap;
-  } catch {
-    return {};
-  }
-}
 
 function dedupe<T>(rows: T[], key: (r: T) => string): T[] {
   const seen = new Map<string, T>();
@@ -41,95 +32,186 @@ function dedupe<T>(rows: T[], key: (r: T) => string): T[] {
   return [...seen.values()];
 }
 
+const newId = () => `toko-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
 export default function App() {
   const [tab, setTab] = useState<Tab>('upload');
   const [data, setData] = useState<Dataset>(emptyDataset);
-  const [hpp, setHpp] = useState<HppMap>(loadHpp);
+  const [settings, setSettings] = useState<Settings>(emptySettings);
   const [month, setMonth] = useState<MonthFilter>('all');
-  const [errors, setErrors] = useState<string[]>([]);
-  const [busy, setBusy] = useState(false);
-  const [choice, setChoice] = useState<Marketplace>('shopee');
-  const M = MARKETPLACES[data.marketplace ?? choice];
+  const [store, setStore] = useState<StoreFilter>('all');
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
+  const [busy, setBusy] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [saved, setSaved] = useState<'idle' | 'saved' | 'failed'>('idle');
+  const saveTimer = useRef<number>();
+
+  // Restore the last session from this browser.
+  useEffect(() => {
+    loadState().then((state) => {
+      if (state?.data?.stores) {
+        setData(state.data);
+        setSettings({ ...emptySettings, ...state.settings });
+        if (state.data.orders.length) setTab('dashboard');
+      }
+      setLoaded(true);
+    });
+  }, []);
 
   useEffect(() => {
-    if (data.sample) return;
-    try {
-      localStorage.setItem(HPP_KEY, JSON.stringify(hpp));
-    } catch {
-      /* storage unavailable: HPP lives for this session only */
-    }
-  }, [hpp, data.sample]);
+    if (!loaded) return;
+    window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => {
+      saveState({ data, settings }).then((ok) => setSaved(ok ? 'saved' : 'failed'));
+    }, 400);
+  }, [data, settings, loaded]);
 
   useEffect(() => {
     window.scrollTo({ top: 0 });
     document.querySelector('.step[aria-current="page"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
   }, [tab]);
 
+  useEffect(() => {
+    if (store !== 'all' && !data.stores.some((s) => s.id === store)) setStore('all');
+    document.querySelector('.rail-store[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+  }, [data.stores, store]);
+
   const hasData = data.orders.length > 0;
   const months = useMemo(() => allMonths(data), [data]);
-  const products = useMemo(() => allProducts(data), [data]);
-  const summary = useMemo(() => summarize(data, hpp, month), [data, hpp, month]);
+  const scopeStores = store === 'all' ? data.stores : data.stores.filter((s) => s.id === store);
+  const M = infoFor(scopeStores.map((s) => s.marketplace));
+  const summary = useMemo(() => summarize(data, settings, month, store), [data, settings, month, store]);
   const previous = useMemo(() => {
     if (month === 'all') return null;
     const p = prevMonth(month);
-    return months.includes(p) ? summarize(data, hpp, p) : null;
-  }, [data, hpp, month, months]);
-  const insights = useMemo(() => buildInsights(summary, previous, M), [summary, previous, M]);
+    return months.includes(p) ? summarize(data, settings, p, store) : null;
+  }, [data, settings, month, months, store]);
+  const perStore = useMemo(() => (data.stores.length > 1 ? data.stores.map((st) => ({ store: st, s: summarize(data, settings, month, st.id) })) : []), [data, settings, month]);
+  const insights = useMemo(() => {
+    const list = [...buildInsights(summary, previous, M), ...(store === 'all' ? buildStoreInsights(perStore, summary) : [])];
+    const rank = { critical: 0, warning: 1, info: 2 };
+    return list.sort((a, b) => b.impact - a.impact || rank[a.tone] - rank[b.tone]);
+  }, [summary, previous, M, perStore, store]);
+  const products = useMemo(() => allProducts(data, settings), [data, settings]);
+  const missingHpp = products.filter((p) => !(p.id in settings.hpp)).length;
 
   const useSample = useCallback(() => {
-    setData(sampleDataset(choice));
-    setHpp(sampleHpp());
+    const s = sampleState();
+    setData(s.data);
+    setSettings(s.settings);
     setMonth('all');
-    setErrors([]);
+    setStore('all');
+    setErrors({});
     setTab('dashboard');
-  }, [choice]);
+  }, []);
 
   const reset = useCallback(() => {
+    clearState();
     setData(emptyDataset);
-    setHpp(loadHpp());
+    setSettings(emptySettings);
     setMonth('all');
-    setErrors([]);
+    setStore('all');
+    setErrors({});
+  }, []);
+
+  const addStore = useCallback((marketplace: Marketplace) => {
+    setData((d) => {
+      const base = d.sample ? emptyDataset : d;
+      const n = base.stores.length + 1;
+      const st: Store = { id: newId(), name: `Toko ${n}`, marketplace, files: {} };
+      return { ...base, stores: [...base.stores, st], sample: false };
+    });
+    setSettings((s) => (data.sample ? emptySettings : s));
+  }, [data.sample]);
+
+  const updateStore = useCallback((id: string, patch: Partial<Pick<Store, 'name' | 'marketplace'>>) => {
+    setData((d) => ({ ...d, stores: d.stores.map((s) => (s.id === id ? { ...s, ...patch } : s)) }));
+  }, []);
+
+  const removeStore = useCallback((id: string) => {
+    setData((d) => ({
+      ...d,
+      stores: d.stores.filter((s) => s.id !== id),
+      orders: d.orders.filter((o) => o.storeId !== id),
+      income: d.income.filter((r) => r.storeId !== id),
+      ads: d.ads.filter((a) => a.storeId !== id),
+    }));
+    setSettings((s) => ({
+      ...s,
+      merges: Object.fromEntries(Object.entries(s.merges).filter(([k]) => !k.startsWith(`${id}::`))),
+      expenses: s.expenses.filter((e) => e.storeId !== id),
+    }));
+    setErrors((e) => {
+      const next = { ...e };
+      delete next[id];
+      return next;
+    });
   }, []);
 
   const addFiles = useCallback(
-    async (files: File[]) => {
-      setBusy(true);
+    async (storeId: string, files: File[]) => {
+      setBusy(storeId);
       const errs: string[] = [];
-      let next: Dataset = data.sample ? emptyDataset : data;
-      let nextHpp: HppMap | null = data.sample ? loadHpp() : null;
+      let next = data;
+      let hppUpdate: Record<string, number> = {};
       for (const f of files) {
         try {
           const parsed = await parseFile(f);
-          if ((parsed.kind === 'order' || parsed.kind === 'income') && next.marketplace && next.marketplace !== parsed.marketplace) {
-            throw new Error(`${f.name} adalah file ${MARKETPLACES[parsed.marketplace].name}, sedangkan data yang sudah dimuat dari ${MARKETPLACES[next.marketplace].name}. Satu analisis untuk satu toko: hapus data dulu kalau mau ganti toko.`);
-          }
+          const st = next.stores.find((s) => s.id === storeId)!;
+          let marketplace = st.marketplace;
           if (parsed.kind === 'order' || parsed.kind === 'income') {
-            next = { ...next, marketplace: parsed.marketplace };
-            setChoice(parsed.marketplace);
+            const hasMarketFiles = !!st.files.order || !!st.files.income;
+            if (parsed.marketplace !== st.marketplace) {
+              if (hasMarketFiles) throw new Error(`${f.name} adalah file ${MARKETPLACES[parsed.marketplace].name}, sedangkan ${st.name} toko ${MARKETPLACES[st.marketplace].name}. Upload ke kartu toko yang sesuai, atau tambah toko baru.`);
+              marketplace = parsed.marketplace;
+            }
           }
-          if (parsed.kind === 'order') {
-            next = { ...next, orders: dedupe([...next.orders, ...parsed.rows], (r) => `${r.orderNo}|${r.product}|${r.variant}`), files: { ...next.files, order: parsed.meta }, sample: false };
-          } else if (parsed.kind === 'income') {
-            next = { ...next, income: dedupe([...next.income, ...parsed.rows], (r) => r.orderNo), files: { ...next.files, income: parsed.meta }, sample: false };
-          } else if (parsed.kind === 'ads') {
-            next = { ...next, ads: [...next.ads, ...parsed.rows], files: { ...next.files, ads: parsed.meta }, sample: false };
-          } else {
-            nextHpp = { ...(nextHpp ?? hpp), ...parsed.hpp };
+          if (parsed.kind === 'hpp') {
+            hppUpdate = { ...hppUpdate, ...parsed.hpp };
+            continue;
           }
+          const tag = <T extends { storeId: string }>(rows: T[]) => rows.map((r) => ({ ...r, storeId }));
+          const stores = next.stores.map((s) => (s.id === storeId ? { ...s, marketplace, files: { ...s.files, [parsed.kind]: parsed.meta } } : s));
+          if (parsed.kind === 'order') next = { ...next, stores, orders: dedupe([...next.orders, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}|${r.product}|${r.variant}`) };
+          else if (parsed.kind === 'income') next = { ...next, stores, income: dedupe([...next.income, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}`) };
+          else next = { ...next, stores, ads: [...next.ads, ...tag(parsed.rows)] };
         } catch (e) {
           errs.push(e instanceof Error ? e.message : `${f.name}: file tidak bisa dibaca.`);
         }
       }
       setData(next);
-      if (nextHpp) setHpp(nextHpp);
-      setErrors(errs);
-      setBusy(false);
+      if (Object.keys(hppUpdate).length) {
+        setSettings((s) => {
+          const hpp = { ...s.hpp };
+          for (const o of next.orders) {
+            const v = hppUpdate[o.product] ?? hppUpdate[productId(s, o.storeId, o.product).replace(/^g::/, '')];
+            if (v) hpp[productId(s, o.storeId, o.product)] = v;
+          }
+          return { ...s, hpp };
+        });
+      }
+      setErrors((e) => ({ ...e, [storeId]: errs }));
+      setBusy(null);
     },
-    [data, hpp],
+    [data],
   );
 
-  const monthSelect = hasData && (
+  const toolbar = hasData && (
     <div className="toolbar">
+      {data.stores.length > 1 && (
+        <span className="field-inline">
+          <label htmlFor="toko">Toko</label>
+          <select id="toko" className="select" value={store} onChange={(e) => setStore(e.target.value)}>
+            <option value="all">Semua toko ({data.stores.length})</option>
+            {data.stores.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} · {MARKETPLACES[s.marketplace].name}
+              </option>
+            ))}
+          </select>
+        </span>
+      )}
+      <span className="field-inline">
       <label htmlFor="bulan">Bulan</label>
       <select id="bulan" className="select" value={month} onChange={(e) => setMonth(e.target.value)}>
         <option value="all">Semua bulan</option>
@@ -139,31 +221,19 @@ export default function App() {
           </option>
         ))}
       </select>
+      </span>
     </div>
   );
 
-  const files = data.files;
-  const missingHpp = products.filter((p) => !(p in hpp)).length;
+  const noData = <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />;
+  const rows = (id: string, slot: 'order' | 'income' | 'ads') => data.stores.find((s) => s.id === id)?.files[slot]?.rows;
 
   return (
     <div className="shell">
       <nav className="rail" aria-label="Langkah">
         <div className="brand">
           <strong>Profit Toko</strong>
-          <span>Profit asli toko {M.name}</span>
-        </div>
-        <div className="mp-switch" role="group" aria-label="Marketplace">
-          {(['shopee', 'tiktok'] as Marketplace[]).map((id) => (
-            <button
-              key={id}
-              aria-pressed={(data.marketplace ?? choice) === id}
-              disabled={hasData && data.marketplace !== id}
-              title={hasData && data.marketplace !== id ? 'Hapus data di tab Upload untuk ganti marketplace' : undefined}
-              onClick={() => setChoice(id)}
-            >
-              {MARKETPLACES[id].name}
-            </button>
-          ))}
+          <span>Profit asli semua tokomu</span>
         </div>
         <ol className="steps">
           {TABS.map((t, i) => (
@@ -175,47 +245,73 @@ export default function App() {
             </li>
           ))}
         </ol>
-        <div className="plies">
-          <span className="plies-title">File sumber{data.sample ? ' · data contoh' : ''}</span>
-          <div className="ply-stack">
-            <div className={`ply-sheet order${files.order ? '' : ' missing'}`}>
-              <b>Order</b>
-              <span>{files.order ? `${num(files.order.rows)} baris` : 'belum ada'}</span>
-            </div>
-            <div className={`ply-sheet income${files.income ? '' : ' missing'}`}>
-              <b>Income</b>
-              <span>{files.income ? `${num(files.income.rows)} baris` : 'belum ada'}</span>
-            </div>
-            <div className={`ply-sheet ads${files.ads ? '' : ' missing'}`}>
-              <b>Iklan</b>
-              <span>{files.ads ? `${num(files.ads.rows)} baris` : 'opsional'}</span>
-            </div>
+        {data.stores.length > 0 && (
+          <div className="rail-stores">
+            <span className="plies-title">Toko{data.sample ? ' · data contoh' : ''}</span>
+            {data.stores.length > 1 && (
+              <button className="rail-store" aria-pressed={store === 'all'} onClick={() => setStore('all')}>
+                <span className="store-mark all" aria-hidden="true">
+                  {data.stores.length}
+                </span>
+                <span className="rail-store-name">Semua toko</span>
+              </button>
+            )}
+            {data.stores.map((s) => (
+              <button key={s.id} className="rail-store" aria-pressed={store === s.id || data.stores.length === 1} onClick={() => setStore(data.stores.length > 1 ? s.id : 'all')}>
+                <StoreMark store={s} />
+                <span className="rail-store-name">
+                  {s.name}
+                  <small>{MARKETPLACES[s.marketplace].name}</small>
+                </span>
+                <span className="rail-plies" aria-label={`File: order ${rows(s.id, 'order') ? 'ada' : 'belum'}, income ${rows(s.id, 'income') ? 'ada' : 'belum'}, iklan ${rows(s.id, 'ads') ? 'ada' : 'belum'}`}>
+                  <i className={`o${rows(s.id, 'order') ? '' : ' off'}`} />
+                  <i className={`i${rows(s.id, 'income') ? '' : ' off'}`} />
+                  <i className={`a${rows(s.id, 'ads') ? '' : ' off'}`} />
+                </span>
+              </button>
+            ))}
+            {hasData && missingHpp > 0 && (
+              <p className="rail-note">
+                {missingHpp} dari {products.length} produk belum ada HPP.{' '}
+                <button onClick={() => setTab('produk')}>Lengkapi</button>
+              </p>
+            )}
           </div>
-          {hasData && missingHpp > 0 && (
-            <p className="rail-note">
-              {missingHpp} dari {products.length} produk belum ada HPP.{' '}
-              <button onClick={() => setTab('produk')}>Lengkapi</button>
-            </p>
-          )}
-        </div>
-        <p className="rail-foot">File diproses di browser ini saja. Tidak ada yang dikirim ke server.</p>
+        )}
+        <p className="rail-foot">
+          Data tersimpan di browser ini saja{saved === 'failed' ? ' (gagal menyimpan, browser memblokir penyimpanan)' : ''}. Tidak ada yang dikirim ke server.
+        </p>
       </nav>
 
       <main className="main" id="konten">
         {data.sample && tab !== 'upload' && (
           <p className="sample-bar">
-            <span className="sample-tag">Data contoh</span> Angka di halaman ini dari toko herbal fiktif.{' '}
+            <span className="sample-tag">Data contoh</span> Angka di halaman ini dari 3 toko herbal fiktif.{' '}
             <button className="btn btn-ghost" onClick={() => setTab('upload')}>
               Ganti dengan data tokomu
             </button>
           </p>
         )}
-        {tab === 'panduan' && <Guide M={M} onNext={() => setTab('upload')} />}
-        {tab === 'upload' && <Upload M={M} data={data} errors={errors} busy={busy} onFiles={addFiles} onSample={useSample} onReset={reset} onNext={() => setTab(products.length ? 'produk' : 'dashboard')} productsMissingHpp={missingHpp} />}
-        {tab === 'order' && (hasData ? <OrderIncome M={M} data={data} summary={summary} month={month} toolbar={monthSelect} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'produk' && (hasData ? <Products M={M} summary={summary} products={products} hpp={hpp} onHpp={setHpp} toolbar={monthSelect} onNext={() => setTab('dashboard')} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'dashboard' && (hasData ? <Dashboard M={M} summary={summary} insights={insights} toolbar={monthSelect} goTo={setTab} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
-        {tab === 'insight' && (hasData ? <Insights M={M} data={data} hpp={hpp} summary={summary} previous={previous} insights={insights} months={months} toolbar={monthSelect} goTo={setTab} /> : <NoData M={M} onUpload={() => setTab('upload')} onSample={useSample} />)}
+        {tab === 'panduan' && <Guide initial={data.stores[0]?.marketplace ?? 'shopee'} onNext={() => setTab('upload')} />}
+        {tab === 'upload' && (
+          <Upload
+            data={data}
+            errors={errors}
+            busy={busy}
+            onFiles={addFiles}
+            onAddStore={addStore}
+            onUpdateStore={updateStore}
+            onRemoveStore={removeStore}
+            onSample={useSample}
+            onReset={reset}
+            onNext={() => setTab(products.length ? 'produk' : 'dashboard')}
+            productsMissingHpp={missingHpp}
+          />
+        )}
+        {tab === 'order' && (hasData ? <OrderIncome M={M} data={data} summary={summary} month={month} store={store} toolbar={toolbar} /> : noData)}
+        {tab === 'produk' && (hasData ? <Products data={data} settings={settings} onSettings={setSettings} summary={summary} toolbar={toolbar} onNext={() => setTab('dashboard')} /> : noData)}
+        {tab === 'dashboard' && (hasData ? <Dashboard M={M} data={data} settings={settings} onSettings={setSettings} summary={summary} perStore={store === 'all' ? perStore : []} insights={insights} month={month} store={store} toolbar={toolbar} goTo={setTab} onPickStore={setStore} /> : noData)}
+        {tab === 'insight' && (hasData ? <Insights M={M} data={data} settings={settings} summary={summary} previous={previous} insights={insights} months={months} store={store} toolbar={toolbar} goTo={setTab} /> : noData)}
       </main>
     </div>
   );

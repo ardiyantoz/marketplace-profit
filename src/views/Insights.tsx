@@ -1,16 +1,17 @@
 import { useMemo, type ReactNode } from 'react';
 import type { Tab } from '../App';
 import { Icon, Ply } from '../components/ui';
-import { summarize, type Summary } from '../lib/compute';
+import { summarize, type StoreFilter, type Summary } from '../lib/compute';
 import { monthLabel, num, pct, prevMonth, rp, rpShort } from '../lib/format';
 import { buildInsights, type Insight } from '../lib/insights';
 import type { MarketplaceInfo } from '../lib/marketplace';
-import type { Dataset, HppMap } from '../lib/types';
+import type { Dataset, Settings } from '../lib/types';
 
 interface Props {
   M: MarketplaceInfo;
   data: Dataset;
-  hpp: HppMap;
+  settings: Settings;
+  store: StoreFilter;
   summary: Summary;
   previous: Summary | null;
   insights: Insight[];
@@ -19,14 +20,14 @@ interface Props {
   goTo: (t: Tab) => void;
 }
 
-export function Insights({ M, data, hpp, summary, previous, insights, months, toolbar, goTo }: Props) {
+export function Insights({ M, data, settings, store, summary, previous, insights, months, toolbar, goTo }: Props) {
   // With "Semua bulan" selected, compare the latest month against the one before it.
   const pair = useMemo(() => {
     if (summary.month !== 'all') return previous ? { cur: summary, prev: previous } : null;
     const last = months[months.length - 1];
     if (!last || !months.includes(prevMonth(last))) return null;
-    return { cur: summarize(data, hpp, last), prev: summarize(data, hpp, prevMonth(last)) };
-  }, [summary, previous, months, data, hpp]);
+    return { cur: summarize(data, settings, last, store), prev: summarize(data, settings, prevMonth(last), store) };
+  }, [summary, previous, months, data, settings, store]);
 
   const list = summary.month === 'all' || !pair ? insights : buildInsights(summary, pair.prev, M);
 

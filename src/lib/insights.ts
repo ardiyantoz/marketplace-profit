@@ -1,7 +1,7 @@
 import { WEEKDAYS_FULL as WEEKDAYS, monthLabel, pct, rpShort, shortName } from './format';
 import type { Summary } from './compute';
 import type { MarketplaceInfo } from './marketplace';
-import type { Source } from './types';
+import type { Source, Store } from './types';
 
 export interface Insight {
   id: string;
@@ -142,4 +142,98 @@ export function buildInsights(s: Summary, prev: Summary | null, M: MarketplaceIn
 
   const rank = { critical: 0, warning: 1, info: 2 };
   return out.sort((a, b) => b.impact - a.impact || rank[a.tone] - rank[b.tone]);
+}
+
+export interface StoreSummary {
+  store: Store;
+  s: Summary;
+}
+
+/** Rules that only make sense across several stores. */
+export function buildStoreInsights(stores: StoreSummary[], all: Summary): Insight[] {
+  const out: Insight[] = [];
+  const active = stores.filter((x) => x.s.omzet > 0);
+  if (active.length < 2 || !all.omzet) return out;
+
+  for (const { store, s } of active.filter((x) => x.s.profit < 0).sort((a, b) => a.s.profit - b.s.profit)) {
+    const causes = [
+      { label: 'iklan', v: s.ads },
+      { label: 'potongan marketplace', v: s.marketplace + s.voucher },
+      { label: 'HPP', v: s.hppKnown + s.hppEstimated },
+      { label: 'biaya operasional', v: s.opex },
+    ].sort((a, b) => b.v - a.v);
+    out.push({
+      id: `store-loss-${store.id}`,
+      title: `Toko ${store.name} rugi ${rpShort(s.profit)}`,
+      detail: `Margin ${pct(s.margin)}. Biaya terbesar: ${causes[0].label} (${pct(causes[0].v / s.omzet, 0)} dari omzet toko ini).`,
+      action: s.ads / s.omzet > AD_TARGET ? `Mulai dari iklan toko ini: rasionya ${pct(s.ads / s.omzet, 0)}, di atas batas ${pct(AD_TARGET, 0)}.` : 'Cek harga jual dan HPP produk terlaris toko ini.',
+      impact: -s.profit,
+      sources: ['order', 'income', 'ads'],
+      tone: 'critical',
+      link: 'produk',
+    });
+  }
+
+  const overallAds = all.ads / all.omzet;
+  const worstAds = [...active].sort((a, b) => b.s.ads / b.s.omzet - a.s.ads / a.s.omzet)[0];
+  const worstRatio = worstAds.s.ads / worstAds.s.omzet;
+  if (worstRatio > 0.12 && worstRatio > overallAds * 1.25) {
+    out.push({
+      id: 'store-ads',
+      title: `Iklan toko ${worstAds.store.name} paling boros: ${pct(worstRatio, 0)} dari omzet`,
+      detail: `Rata-rata semua toko ${pct(overallAds, 0)}. ${active.map((x) => `${x.store.name} ${pct(x.s.ads / x.s.omzet, 0)}`).join(' · ')}.`,
+      action: `Turunkan iklan ${worstAds.store.name} ke rata-rata toko lain, atau pindahkan anggarannya ke toko yang iklannya lebih efisien.`,
+      impact: (worstRatio - overallAds) * worstAds.s.omzet,
+      sources: ['ads', 'order'],
+      tone: 'warning',
+    });
+  }
+
+  // Same (merged) product sold at different prices across stores.
+  const gaps: { name: string; low: string; high: string; lowPrice: number; highPrice: number; gap: number }[] = [];
+  const priceOf = new Map<string, { store: string; price: number; margin: number }[]>();
+  for (const { store, s } of active) {
+    for (const p of s.products) {
+      if (!p.id.startsWith('g::') || !p.qty) continue;
+      if (!priceOf.has(p.id)) priceOf.set(p.id, []);
+      priceOf.get(p.id)!.push({ store: store.name, price: p.sales / p.qty, margin: p.margin });
+    }
+  }
+  for (const [id, list] of priceOf) {
+    if (list.length < 2) continue;
+    const sorted = [...list].sort((a, b) => a.price - b.price);
+    const lo = sorted[0];
+    const hi = sorted[sorted.length - 1];
+    const gap = hi.price / lo.price - 1;
+    if (gap >= 0.08) gaps.push({ name: id.slice(3), low: lo.store, high: hi.store, lowPrice: lo.price, highPrice: hi.price, gap });
+  }
+  if (gaps.length) {
+    gaps.sort((a, b) => b.gap - a.gap);
+    out.push({
+      id: 'store-price',
+      title: `${gaps.length} produk dijual dengan harga berbeda antar toko`,
+      detail: gaps
+        .slice(0, 3)
+        .map((g) => `${g.name}: ${rpShort(g.lowPrice)} di ${g.low} vs ${rpShort(g.highPrice)} di ${g.high} (${pct(g.gap, 0)})`)
+        .join('; ') + '.',
+      action: 'Pastikan harga termurah masih di atas modal plus potongan marketplace. Kalau tidak, naikkan harga di toko itu.',
+      impact: 0,
+      sources: ['order', 'hpp'],
+      tone: 'warning',
+      link: 'produk',
+    });
+  }
+
+  const byOmzet = [...active].sort((a, b) => b.s.omzet - a.s.omzet);
+  const share = byOmzet[0].s.omzet / all.omzet;
+  out.push({
+    id: 'store-share',
+    title: `${pct(share, 0)} omzet datang dari toko ${byOmzet[0].store.name}`,
+    detail: byOmzet.map((x) => `${x.store.name} ${pct(x.s.omzet / all.omzet, 0)} omzet, profit ${rpShort(x.s.profit)}`).join(' · ') + '.',
+    action: share > 0.6 ? 'Tokomu bergantung pada satu toko. Kalau toko itu kena penalti atau turun, semua ikut turun; kembangkan toko kedua.' : 'Porsi omzet antar toko cukup seimbang.',
+    impact: 0,
+    sources: ['order'],
+    tone: share > 0.6 ? 'warning' : 'info',
+  });
+  return out;
 }

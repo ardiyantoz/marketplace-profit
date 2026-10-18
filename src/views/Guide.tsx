@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Icon, Ply } from '../components/ui';
-import type { MarketplaceInfo } from '../lib/marketplace';
+import { MARKETPLACES, type Marketplace } from '../lib/marketplace';
 import type { Source } from '../lib/types';
 
 interface Card {
@@ -119,7 +119,9 @@ const TIKTOK: Card[] = [
   },
 ];
 
-export function Guide({ M, onNext }: { M: MarketplaceInfo; onNext: () => void }) {
+export function Guide({ initial, onNext }: { initial: Marketplace; onNext: () => void }) {
+  const [mp, setMp] = useState<Marketplace>(initial);
+  const M = MARKETPLACES[mp];
   const cards = [...(M.id === 'tiktok' ? TIKTOK : SHOPEE), HPP_CARD(M.name)];
   return (
     <>
@@ -127,7 +129,7 @@ export function Guide({ M, onNext }: { M: MarketplaceInfo; onNext: () => void })
         <div>
           <h1>Panduan {M.name}</h1>
           <p>
-            Siapkan tiga file dari {M.center}, lalu isi HPP. Sekitar 5 menit.
+            Siapkan tiga file dari {M.center} untuk setiap toko, lalu isi HPP. Sekitar 5 menit per toko.
           </p>
         </div>
         <button className="btn btn-primary" onClick={onNext}>
@@ -135,6 +137,14 @@ export function Guide({ M, onNext }: { M: MarketplaceInfo; onNext: () => void })
           <Icon name="arrow" />
         </button>
       </header>
+
+      <div className="segmented" role="group" aria-label="Panduan untuk marketplace">
+        {(['shopee', 'tiktok'] as Marketplace[]).map((id) => (
+          <button key={id} aria-pressed={mp === id} onClick={() => setMp(id)}>
+            {MARKETPLACES[id].name}
+          </button>
+        ))}
+      </div>
 
       <div className="guide">
         {cards.map((c) => (

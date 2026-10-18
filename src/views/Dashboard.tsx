@@ -1,24 +1,65 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import type { Tab } from '../App';
 import { DailyLine, Waterfall, WaterfallList, WeekdayBars } from '../components/charts';
-import { Icon, Plies, Ply, SOURCE_LABEL } from '../components/ui';
-import type { ProductStat, Summary } from '../lib/compute';
+import { Icon, Plies, Ply, SOURCE_LABEL, StoreTag } from '../components/ui';
+import type { MonthFilter, ProductStat, StoreFilter, Summary } from '../lib/compute';
+import { CATEGORY_LABEL } from '../lib/cashflow';
+import type { StoreSummary } from '../lib/insights';
+import { Cashflow } from './Cashflow';
 import { dateLabel, monthLabel, num, pct, rp, rpShort } from '../lib/format';
 import type { Insight } from '../lib/insights';
 import type { MarketplaceInfo } from '../lib/marketplace';
-import type { Source } from '../lib/types';
+import type { Dataset, Settings, Source, Store } from '../lib/types';
 
-type Stage = 'order' | 'income' | 'ads' | 'hpp' | 'other';
+type Stage = 'order' | 'income' | 'ads' | 'hpp' | 'other' | 'opex';
 
 interface Props {
   M: MarketplaceInfo;
+  data: Dataset;
+  settings: Settings;
+  onSettings: (fn: (s: Settings) => Settings) => void;
   summary: Summary;
+  perStore: StoreSummary[];
   insights: Insight[];
+  month: MonthFilter;
+  store: StoreFilter;
   toolbar: ReactNode;
   goTo: (t: Tab) => void;
+  onPickStore: (id: string) => void;
 }
 
-export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
+export function Dashboard(props: Props) {
+  const [view, setView] = useState<'profit' | 'cash'>('profit');
+  const { summary: s, toolbar, data, store } = props;
+  const period = s.month === 'all' ? 'Semua bulan' : monthLabel(s.month);
+  const scope = store === 'all' ? (data.stores.length > 1 ? `${data.stores.length} toko` : data.stores[0]?.name ?? '') : data.stores.find((x) => x.id === store)?.name ?? '';
+  return (
+    <>
+      <header className="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <p>
+            {period} · {scope}
+          </p>
+        </div>
+        {toolbar}
+      </header>
+      <div className="view-tabs" role="tablist" aria-label="Tampilan dashboard">
+        <button role="tab" aria-selected={view === 'profit'} onClick={() => setView('profit')}>
+          Profit
+          <small>per tanggal pesanan</small>
+        </button>
+        <button role="tab" aria-selected={view === 'cash'} onClick={() => setView('cash')}>
+          Cashflow
+          <small>per tanggal uang bergerak</small>
+        </button>
+      </div>
+      {view === 'profit' ? <ProfitView {...props} /> : <Cashflow M={props.M} data={data} settings={props.settings} onSettings={props.onSettings} month={props.month} store={store} />}
+    </>
+  );
+}
+
+function ProfitView({ M, summary: s, insights, goTo, perStore, data, onPickStore }: Props) {
   const [open, setOpen] = useState<Stage | null>(null);
   const loss = s.profit < 0;
   const period = s.month === 'all' ? 'semua bulan' : monthLabel(s.month);
@@ -34,6 +75,7 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
     { key: 'other', label: 'Lainnya', value: s.other, color: '#f7dfe6', source: 'income' as Source },
   ].sort((a, b) => b.value - a.value);
   const beforeHpp = s.omzet - s.marketplace - s.voucher - s.ads - s.other;
+  const storeOf = new Map(data.stores.map((x) => [x.id, x]));
   const biggest = [{ label: 'HPP', value: s.hppKnown + s.hppEstimated }, ...costs].sort((a, b) => b.value - a.value)[0];
 
   const diagnoses = insights.filter((i) => i.tone !== 'info').slice(0, 3);
@@ -47,20 +89,11 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
     { id: 'ads', source: 'ads', label: 'Biaya iklan', value: -s.ads, hint: s.hasAds ? `${pct(s.ads / (s.omzet || 1))} dari omzet` : 'File iklan belum diupload' },
     { id: 'hpp', source: 'hpp', label: s.hppEstimated ? `HPP + estimasi ${s.missingHpp.length} produk` : 'HPP', value: -(s.hppKnown + s.hppEstimated), hint: `${pct((s.hppKnown + s.hppEstimated) / (s.omzet || 1))} dari omzet` },
     { id: 'other', source: 'income', label: 'Biaya lainnya', value: -s.other, hint: 'Premi, transaksi, kampanye' },
-  ].filter((st) => st.id !== 'other' || s.other > 0) as typeof stages;
+    { id: 'opex', source: 'manual', label: 'Biaya operasional', value: -s.opex, hint: 'Gaji, packaging, sewa dari catatanmu' },
+  ].filter((st) => (st.id !== 'other' || s.other > 0) && (st.id !== 'opex' || s.opex > 0)) as typeof stages;
 
   return (
     <>
-      <header className="page-head">
-        <div>
-          <h1>Dashboard profit</h1>
-          <p>
-            {period === 'semua bulan' ? 'Semua bulan' : period}
-          </p>
-        </div>
-        {toolbar}
-      </header>
-
       <section className="panel verdict" aria-labelledby="v-title">
         <div className="verdict-main">
           <h2 id="v-title" className="verdict-label">
@@ -68,13 +101,13 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
           </h2>
           <p className={`verdict-figure num ${loss ? 'loss' : 'gain'}`}>{rpShort(s.profit)}</p>
           <p className="verdict-line">
-            {loss ? <b>Rugi.</b> : <b>Untung.</b>} Margin <b className="num">{pct(s.margin)}</b>. {M.name} mencatat {M.payoutLabel} <b className="num">{rpShort(s.payout)}</b>, tapi setelah iklan dan HPP yang tersisa {rpShort(s.profit)}. Biaya terbesar: {biggest.label === 'HPP' ? 'HPP' : biggest.label.toLowerCase()} ({pct(biggest.value / (s.omzet || 1), 0)} dari omzet).
+            {loss ? <b>Rugi.</b> : <b>Untung.</b>} Margin <b className="num">{pct(s.margin)}</b>. {M.id === 'mixed' ? 'Marketplace melepas dana' : `${M.name} mencatat ${M.payoutLabel}`} <b className="num">{rpShort(s.payout)}</b>, tapi setelah iklan, HPP{s.opex > 0 ? ' dan biaya operasional' : ''} yang tersisa {rpShort(s.profit)}. Biaya terbesar: {biggest.label === 'HPP' ? 'HPP' : biggest.label.toLowerCase()} ({pct(biggest.value / (s.omzet || 1), 0)} dari omzet).
           </p>
           <div className="verdict-meta">
             <span className={`score ${s.health.label}`}>
               <span className="num">{`${s.health.score}/100`}</span> · {s.health.label}
             </span>
-            <Plies label="Dihitung dari" sources={(['order', 'income', 'ads', 'hpp'] as Source[]).filter((x) => x !== 'ads' || s.hasAds)} />
+            <Plies label="Dihitung dari" sources={(['order', 'income', 'ads', 'hpp', 'manual'] as Source[]).filter((x) => (x !== 'ads' || s.hasAds) && (x !== 'manual' || s.opex > 0))} />
           </div>
         </div>
         <div className="verdict-main">
@@ -126,8 +159,10 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
             <span className="hint">Margin {pct(s.margin)}</span>
           </div>
         </div>
-        {open && <Trace M={M} stage={open} summary={s} onClose={() => setOpen(null)} />}
+        {open && <Trace M={M} stage={open} summary={s} storeOf={storeOf} onClose={() => setOpen(null)} />}
       </section>
+
+      {perStore.length > 1 && <StoreCompare perStore={perStore} total={s} onPick={onPickStore} />}
 
       <section className="panel" aria-labelledby="leak">
         <div className="panel-head">
@@ -163,6 +198,7 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
             { label: 'HPP', value: -s.hppKnown },
             { label: 'HPP estimasi', value: -s.hppEstimated },
             { label: 'Lainnya', value: -s.other },
+            { label: 'Operasional', value: -s.opex },
             { label: 'Profit real', value: s.profit, total: true },
           ]}
         />
@@ -175,6 +211,7 @@ export function Dashboard({ M, summary: s, insights, toolbar, goTo }: Props) {
             { label: 'HPP', value: -s.hppKnown },
             { label: 'HPP estimasi', value: -s.hppEstimated },
             { label: 'Lainnya', value: -s.other },
+            { label: 'Operasional', value: -s.opex },
             { label: 'Profit', value: s.profit, total: true },
           ]}
         />
@@ -355,8 +392,8 @@ function ProductTable({ M, products }: { M: MarketplaceInfo; products: ProductSt
 
 const TRACE_LIMIT = 200;
 
-function Trace({ M, stage, summary: s, onClose }: { M: MarketplaceInfo; stage: Stage; summary: Summary; onClose: () => void }) {
-  const source: Source = stage === 'other' ? 'income' : stage;
+function Trace({ M, stage, summary: s, storeOf, onClose }: { M: MarketplaceInfo; stage: Stage; summary: Summary; storeOf: Map<string, Store>; onClose: () => void }) {
+  const source: Source = stage === 'other' ? 'income' : stage === 'opex' ? 'manual' : stage;
   let title = '';
   let body: ReactNode = null;
   let count = 0;
@@ -429,6 +466,38 @@ function Trace({ M, stage, summary: s, onClose }: { M: MarketplaceInfo; stage: S
         </tbody>
       </table>
     );
+  } else if (stage === 'opex') {
+    count = s.opexRows.length;
+    title = `${num(s.opexRows.length)} catatan biaya operasional, total ${rp(s.opex)}`;
+    body = (
+      <table className="ledger">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Kategori</th>
+            <th>Toko</th>
+            <th>Catatan</th>
+            <th className="r">Masuk profit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {s.opexRows.map(({ expense: e, amount }) => {
+            const st = storeOf.get(e.storeId);
+            return (
+              <tr key={e.id}>
+                <td className="product">{dateLabel(new Date(`${e.date}T00:00:00`))}</td>
+                <td data-label="Kategori">{CATEGORY_LABEL[e.category]}</td>
+                <td data-label="Toko">{st ? <StoreTag store={st} /> : 'Semua toko'}</td>
+                <td data-label="Catatan">{e.note || '–'}</td>
+                <td className="r" data-label="Masuk profit">
+                  {rp(-amount)}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
   } else if (stage === 'ads') {
     const rows = [...s.adRows].sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0));
     count = rows.length;
@@ -494,7 +563,7 @@ function Trace({ M, stage, summary: s, onClose }: { M: MarketplaceInfo; stage: S
   }
 
   return (
-    <div id="trace" className={`trace ${stage === 'other' ? 'income' : stage}`} role="region" aria-label={`Asal angka dari file ${SOURCE_LABEL[source]}`}>
+    <div id="trace" className={`trace ${source}`} role="region" aria-label={`Asal angka dari file ${SOURCE_LABEL[source]}`}>
       <div className="trace-head">
         <h3>
           <Ply source={source} /> {title}
@@ -507,5 +576,96 @@ function Trace({ M, stage, summary: s, onClose }: { M: MarketplaceInfo; stage: S
       <div className="table-wrap">{body}</div>
       {count > TRACE_LIMIT && <p className="more muted">Menampilkan {num(TRACE_LIMIT)} baris terbesar dari {num(count)}. Semua baris ada di tab Order &amp; Income.</p>}
     </div>
+  );
+}
+
+/** Combined is the headline; this is where each store's share of it shows. */
+function StoreCompare({ perStore, total, onPick }: { perStore: StoreSummary[]; total: Summary; onPick: (id: string) => void }) {
+  const rows = [...perStore].sort((a, b) => b.s.profit - a.s.profit);
+  return (
+    <section className="panel panel-flush" aria-labelledby="stores">
+      <div className="panel-head">
+        <h2 id="stores">Perbandingan toko</h2>
+        <p>Klik nama toko untuk melihat dashboard toko itu saja</p>
+      </div>
+      <div className="table-wrap">
+        <table className="ledger store-table">
+          <thead>
+            <tr>
+              <th>Toko</th>
+              <th className="r">Omzet</th>
+              <th className="r">Potongan</th>
+              <th className="r">Iklan</th>
+              <th className="r">HPP</th>
+              <th className="r">Operasional</th>
+              <th className="r">Profit</th>
+              <th className="r">Margin</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(({ store, s }) => (
+              <tr key={store.id} className={s.profit < 0 ? 'loss-row' : undefined}>
+                <td className="product">
+                  <button className="store-link" onClick={() => onPick(store.id)}>
+                    <StoreTag store={store} />
+                  </button>
+                </td>
+                <td className="r" data-label="Omzet">
+                  <span>
+                    {rp(s.omzet)} <small className="muted">{pct(s.omzet / (total.omzet || 1), 0)} omzet</small>
+                  </span>
+                </td>
+                <td className="r" data-label="Potongan">
+                  {rp(-(s.marketplace + s.voucher + s.other))}
+                </td>
+                <td className="r" data-label="Iklan">
+                  <span>
+                    {rp(-s.ads)} <small className="muted">{pct(s.ads / (s.omzet || 1), 0)} dari omzet</small>
+                  </span>
+                </td>
+                <td className="r" data-label="HPP">
+                  {rp(-(s.hppKnown + s.hppEstimated))}
+                </td>
+                <td className="r" data-label="Operasional">
+                  {rp(-s.opex)}
+                </td>
+                <td className={`r ${s.profit < 0 ? 'neg' : 'pos'}`} data-label="Profit">
+                  {rp(s.profit)}
+                </td>
+                <td className="r" data-label="Margin">
+                  {pct(s.margin, 0)}
+                </td>
+              </tr>
+            ))}
+            <tr className="total-row">
+              <td className="product">
+                <b>Semua toko</b>
+              </td>
+              <td className="r" data-label="Omzet">
+                <b>{rp(total.omzet)}</b>
+              </td>
+              <td className="r" data-label="Potongan">
+                {rp(-(total.marketplace + total.voucher + total.other))}
+              </td>
+              <td className="r" data-label="Iklan">
+                {rp(-total.ads)}
+              </td>
+              <td className="r" data-label="HPP">
+                {rp(-(total.hppKnown + total.hppEstimated))}
+              </td>
+              <td className="r" data-label="Operasional">
+                {rp(-total.opex)}
+              </td>
+              <td className={`r ${total.profit < 0 ? 'neg' : 'pos'}`} data-label="Profit">
+                {rp(total.profit)}
+              </td>
+              <td className="r" data-label="Margin">
+                {pct(total.margin, 0)}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }

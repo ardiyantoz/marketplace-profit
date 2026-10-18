@@ -1,7 +1,7 @@
 export type Marketplace = 'shopee' | 'tiktok';
 
 export interface MarketplaceInfo {
-  id: Marketplace;
+  id: Marketplace | 'mixed';
   name: string;
   center: string; // seller dashboard name
   payoutLabel: string; // what the marketplace calls the money it releases
@@ -38,3 +38,20 @@ export const MARKETPLACES: Record<Marketplace, MarketplaceInfo> = {
     },
   },
 };
+
+/** Labels for a set of stores: the marketplace's own words when they share one, neutral words when mixed. */
+export const MIXED: MarketplaceInfo = {
+  id: 'mixed',
+  name: 'Shopee & TikTok Shop',
+  center: 'Seller Center',
+  payoutLabel: 'Dana dilepas',
+  cutLabel: 'Potongan marketplace',
+  fees: { admin: 'Komisi / administrasi', service: 'Biaya layanan', ams: 'Komisi afiliasi / AMS', processing: 'Biaya proses / transaksi', shipping: 'Ongkir ditanggung' },
+  slots: MARKETPLACES.shopee.slots,
+};
+
+export function infoFor(marketplaces: Marketplace[]): MarketplaceInfo {
+  const set = [...new Set(marketplaces)];
+  if (set.length === 1) return MARKETPLACES[set[0]];
+  return set.length ? MIXED : MARKETPLACES.shopee;
+}

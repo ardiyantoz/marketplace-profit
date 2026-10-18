@@ -179,3 +179,87 @@ export function WaterfallList({ steps }: { steps: Step[] }) {
     </ol>
   );
 }
+
+export interface CashBar {
+  key: string;
+  label: string;
+  inflow: number;
+  ads: number;
+  expense: number;
+  balance: number | null;
+}
+
+/** Money in above the zero line, money out below it (ads and the seller's own expenses), balance as a line. */
+export function CashChart({ periods }: { periods: CashBar[] }) {
+  const W = Math.max(760, periods.length * 34 + 80);
+  const H = 300;
+  const left = 64;
+  const right = 16;
+  const top = 20;
+  const bottom = 44;
+  const balances = periods.map((p) => p.balance).filter((b): b is number => b !== null);
+  const hi = Math.max(0, ...periods.map((p) => p.inflow), ...balances);
+  const lo = Math.min(0, ...periods.map((p) => -(p.ads + p.expense)), ...balances);
+  const span = hi - lo || 1;
+  const Y = (v: number) => top + ((hi - v) / span) * (H - top - bottom);
+  const band = (W - left - right) / Math.max(1, periods.length);
+  const bw = Math.min(22, band * 0.6);
+  const X = (i: number) => left + i * band + (band - bw) / 2;
+  const tickStep = niceStep(span / 4);
+  const ticks: number[] = [];
+  for (let t = Math.ceil(lo / tickStep) * tickStep; t <= hi + 1; t += tickStep) ticks.push(t);
+  const every = Math.ceil(periods.length / 12);
+  const line = periods
+    .map((p, i) => (p.balance === null ? null : `${X(i) + bw / 2},${Y(p.balance)}`))
+    .filter(Boolean)
+    .join(' ');
+  const last = [...periods].reverse().find((p) => p.balance !== null);
+  const lastIdx = last ? periods.indexOf(last) : -1;
+  return (
+    <div className="chart wide">
+      <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Arus kas ${periods.length} periode${last ? `, saldo akhir ${rpShort(last.balance ?? 0)}` : ''}`}>
+        {ticks.map((t) => (
+          <g key={t}>
+            <line x1={left} x2={W - right} y1={Y(t)} y2={Y(t)} stroke={t === 0 ? 'var(--ink-3)' : 'var(--line)'} strokeWidth={t === 0 ? 1.25 : 1} />
+            <text x={left - 8} y={Y(t) + 4} textAnchor="end" fontSize="11" fill="var(--ink-3)">
+              {rpShort(t).replace('Rp', '')}
+            </text>
+          </g>
+        ))}
+        {periods.map((p, i) => (
+          <g key={p.key}>
+            {p.inflow > 0 && (
+              <rect x={X(i)} y={Y(p.inflow)} width={bw} height={Math.max(1, Y(0) - Y(p.inflow))} rx="2" fill="var(--carbon)">
+                <title>{`${p.label}: masuk ${rpShort(p.inflow)}`}</title>
+              </rect>
+            )}
+            {p.ads > 0 && (
+              <rect x={X(i)} y={Y(0)} width={bw} height={Math.max(1, Y(-p.ads) - Y(0))} fill="var(--ads-ink)">
+                <title>{`${p.label}: iklan ${rpShort(-p.ads)}`}</title>
+              </rect>
+            )}
+            {p.expense > 0 && (
+              <rect x={X(i)} y={Y(-p.ads)} width={bw} height={Math.max(1, Y(-p.ads - p.expense) - Y(-p.ads))} fill="var(--manual-ink)">
+                <title>{`${p.label}: pengeluaran ${rpShort(-p.expense)}`}</title>
+              </rect>
+            )}
+            {i % every === 0 && (
+              <text x={X(i) + bw / 2} y={H - 14} textAnchor="middle" fontSize="11" fill="var(--ink-2)">
+                {p.label}
+              </text>
+            )}
+          </g>
+        ))}
+        {line && <polyline points={line} fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinejoin="round" />}
+        {last && last.balance !== null && (
+          <g>
+            <circle cx={X(lastIdx) + bw / 2} cy={Y(last.balance)} r="4" fill="var(--ink)" />
+            <text x={X(lastIdx) + bw / 2 - 8} y={Y(last.balance) - 10} textAnchor="end" fontSize="12" fontWeight="700" fill={last.balance < 0 ? 'var(--loss)' : 'var(--ink)'}>
+              {`Saldo ${rpShort(last.balance)}`}
+            </text>
+          </g>
+        )}
+      </svg>
+    </div>
+  );
+}

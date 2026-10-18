@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-17T15:46:35.700833+00:00",
+  "generatedAt": "2026-10-18T03:26:25.975570+00:00",
   "title": "Design System: Profit Toko",
   "extensions": {
     "colorMeta": {
@@ -290,6 +290,83 @@
           "#faf7ea"
         ]
       },
+      "ads-ink": {
+        "role": "secondary",
+        "displayName": "Iklan Ochre",
+        "canonical": "#c79a12",
+        "tonalRamp": [
+          "#463606",
+          "#7e620b",
+          "#b68d10",
+          "#eab61a",
+          "#efc852",
+          "#f4da8a",
+          "#f9eabe",
+          "#fdf8e8"
+        ],
+        "note": "Ads data marks on white (cash chart, cost share bar, legend). Not text, not a surface."
+      },
+      "ply-manual": {
+        "role": "secondary",
+        "displayName": "Catatan Lavender",
+        "canonical": "#e4daf5",
+        "tonalRamp": [
+          "#21103c",
+          "#3b1d6c",
+          "#552a9d",
+          "#6f3aca",
+          "#936ad7",
+          "#b69be4",
+          "#d6c7f0",
+          "#f0ebfa"
+        ]
+      },
+      "ply-manual-wash": {
+        "role": "secondary",
+        "displayName": "Catatan Wash",
+        "canonical": "#f4effb",
+        "tonalRamp": [
+          "#220f3d",
+          "#3e1c6e",
+          "#5a289f",
+          "#7637cd",
+          "#9768d9",
+          "#b999e5",
+          "#d8c6f1",
+          "#f1ebfa"
+        ]
+      },
+      "ply-manual-edge": {
+        "role": "secondary",
+        "displayName": "Catatan Edge",
+        "canonical": "#c6b4e6",
+        "tonalRamp": [
+          "#211339",
+          "#3b2267",
+          "#563295",
+          "#7144c1",
+          "#9371d0",
+          "#b69fdf",
+          "#d6c9ed",
+          "#f0ecf9"
+        ]
+      },
+      "manual-ink": {
+        "role": "secondary",
+        "displayName": "Catatan Violet",
+        "canonical": "#7a5bb5",
+        "tonalRamp": [
+          "#221835",
+          "#3d2b5f",
+          "#583e89",
+          "#7353b1",
+          "#967dc4",
+          "#b8a7d7",
+          "#d7cee9",
+          "#f1edf7"
+        ],
+        "note": "Expense data marks (category bars, cash chart expense bars, legend)."
+      },
       "ply-hpp": {
         "role": "secondary",
         "displayName": "HPP Pale Blue",
@@ -364,6 +441,22 @@
           "#f3b9c8",
           "#fbe9ee"
         ]
+      },
+      "loss-on-carbon": {
+        "role": "tertiary",
+        "displayName": "Loss on Carbon",
+        "canonical": "#ffb3c4",
+        "tonalRamp": [
+          "#4c0011",
+          "#8a001f",
+          "#c7002c",
+          "#ff053d",
+          "#ff426d",
+          "#ff809c",
+          "#ffb8c8",
+          "#ffe5eb"
+        ],
+        "note": "Negative figure on carbon result surfaces only."
       },
       "gain": {
         "role": "tertiary",
@@ -457,7 +550,7 @@
       },
       "ply-chip": {
         "displayName": "Ply chip",
-        "purpose": "Source chip text only."
+        "purpose": "Source chip text only (Order, Income, Iklan, HPP, Catatan)."
       }
     },
     "shadows": [
@@ -474,7 +567,7 @@
       {
         "name": "selected-outline",
         "value": "0 0 0 2px #1e2a78",
-        "purpose": "Open stage card."
+        "purpose": "Open stage card; drag-over ring on a store card (stacked with panel-ambient)."
       },
       {
         "name": "focus",
@@ -540,16 +633,16 @@
       "kind": "chip",
       "refersTo": "ply-chip-income",
       "description": "Names the source file of a figure.",
-      "html": "<span class=\"ds-chips\"><span class=\"ds-muted\">Dihitung dari</span><span class=\"ds-ply o\">Order</span><span class=\"ds-ply i\">Income</span><span class=\"ds-ply a\">Iklan</span><span class=\"ds-ply h\">HPP</span></span>",
-      "css": ".ds-chips{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;gap:6px;align-items:center}.ds-muted{font-size:.8125rem;color:#5a628f}.ds-ply{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;letter-spacing:.02em;border:1px solid;color:#141b4d}.ds-ply.o{background:#fff;border-color:#c3c8e2}.ds-ply.i{background:#f6d3dd;border-color:#e2aebd}.ds-ply.a{background:#f6e59a;border-color:#dcc562}.ds-ply.h{background:#dce3f7;border-color:#b3bfe6}"
+      "html": "<span class=\"ds-chips\"><span class=\"ds-muted\">Dihitung dari</span><span class=\"ds-ply o\">Order</span><span class=\"ds-ply i\">Income</span><span class=\"ds-ply a\">Iklan</span><span class=\"ds-ply h\">HPP</span><span class=\"ds-ply m\">Catatan</span></span>",
+      "css": ".ds-chips{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;gap:6px;align-items:center}.ds-muted{font-size:.8125rem;color:#5a628f}.ds-ply{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;letter-spacing:.02em;border:1px solid;color:#141b4d}.ds-ply.o{background:#fff;border-color:#c3c8e2}.ds-ply.i{background:#f6d3dd;border-color:#e2aebd}.ds-ply.a{background:#f6e59a;border-color:#dcc562}.ds-ply.h{background:#dce3f7;border-color:#b3bfe6}.ds-ply.m{background:#e4daf5;border-color:#c6b4e6}"
     },
     {
       "name": "Rail Navigation",
       "kind": "nav",
       "refersTo": "rail",
-      "description": "Carbon rail with numbered steps and the fanned file-ply stack.",
-      "html": "<nav class=\"ds-rail\"><strong>Profit Toko</strong><button class=\"ds-step\"><span>1</span>Panduan</button><button class=\"ds-step\" aria-current=\"page\"><span>5</span>Dashboard profit</button><div class=\"ds-stack\"><div class=\"o\"><b>Order</b><span>160 baris</span></div><div class=\"i\"><b>Income</b><span>126 baris</span></div><div class=\"a\"><b>Iklan</b><span>233 baris</span></div></div></nav>",
-      "css": ".ds-rail{font-family:'Public Sans',system-ui,sans-serif;background:#1e2a78;color:#c9cfee;padding:24px 16px;width:248px;display:flex;flex-direction:column;gap:4px}.ds-rail strong{color:#fff;font-weight:800;margin-bottom:16px}.ds-step{font-family:'Public Sans',system-ui,sans-serif;display:flex;gap:10px;align-items:center;padding:10px 8px;border:0;border-radius:6px;background:transparent;color:#c9cfee;font-size:.875rem;text-align:left;cursor:pointer;transition:background-color 150ms ease-out}.ds-step span{width:18px;color:#8f98d0}.ds-step:hover{background:rgba(255,255,255,.08);color:#fff}.ds-step[aria-current=page]{background:#f6e59a;color:#141b4d;font-weight:700}.ds-step[aria-current=page] span{color:#141b4d}.ds-step:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(246,229,154,.7)}.ds-stack{margin-top:24px;display:flex;flex-direction:column}.ds-stack div{display:flex;justify-content:space-between;padding:9px 12px;font-size:.75rem;color:#141b4d}.ds-stack span{color:#5a628f}.ds-stack .o{background:#fff;border-radius:6px 6px 0 0}.ds-stack .i{background:#f6d3dd;margin-left:4px}.ds-stack .a{background:#f6e59a;margin-left:8px;border-radius:0 0 6px 6px}"
+      "description": "Carbon rail with numbered steps and the store list (monogram, name, marketplace, three ply ticks; pressed row filters).",
+      "html": "<nav class=\"ds-rail\"><strong>Profit Toko</strong><button class=\"ds-step\"><span>1</span>Panduan</button><button class=\"ds-step\" aria-current=\"page\"><span>5</span>Dashboard</button><div class=\"ds-stores\"><small>Toko</small><button class=\"ds-store\" aria-pressed=\"true\"><i class=\"ds-mark\">3</i><b>Semua toko</b></button><button class=\"ds-store\" aria-pressed=\"false\"><i class=\"ds-mark\">HU</i><b>Herbal Utama<small>Shopee</small></b><span class=\"ds-ticks\"><i class=\"o\"></i><i class=\"i\"></i><i class=\"a\"></i></span></button><button class=\"ds-store\" aria-pressed=\"false\"><i class=\"ds-mark\">HL</i><b>Herbal Live<small>TikTok Shop</small></b><span class=\"ds-ticks\"><i class=\"o\"></i><i class=\"i\"></i><i class=\"a off\"></i></span></button></div></nav>",
+      "css": ".ds-rail{font-family:'Public Sans',system-ui,sans-serif;background:#1e2a78;color:#c9cfee;padding:24px 16px;width:248px;display:flex;flex-direction:column;gap:4px}.ds-rail strong{color:#fff;font-weight:800;margin-bottom:16px}.ds-step{font-family:inherit;display:flex;gap:10px;align-items:center;padding:10px 8px;border:0;border-radius:6px;background:transparent;color:#c9cfee;font-size:.875rem;text-align:left;cursor:pointer;transition:background-color 150ms ease-out}.ds-step span{width:18px;color:#8f98d0}.ds-step:hover{background:rgba(255,255,255,.08);color:#fff}.ds-step[aria-current=page]{background:#f6e59a;color:#141b4d;font-weight:700}.ds-step[aria-current=page] span{color:#141b4d}.ds-step:focus-visible,.ds-store:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(246,229,154,.7)}.ds-stores{margin-top:24px;display:flex;flex-direction:column;gap:4px}.ds-stores>small{font-size:.75rem;font-weight:600;color:#b9c0e6;margin-bottom:4px}.ds-store{font-family:inherit;display:flex;align-items:center;gap:10px;padding:6px;border:0;border-radius:6px;background:transparent;color:#c9cfee;text-align:left;cursor:pointer;transition:background-color 150ms ease-out}.ds-store:hover{background:rgba(255,255,255,.08)}.ds-store[aria-pressed=true]{background:rgba(255,255,255,.1);color:#fff}.ds-mark{flex:none;display:inline-grid;place-items:center;width:32px;height:32px;border-radius:6px;border:1.5px solid currentColor;font-style:normal;font-size:.75rem;font-weight:800;letter-spacing:.02em;color:#c9cfee}.ds-store[aria-pressed=true] .ds-mark{background:#fff;color:#1e2a78;border-color:#fff}.ds-store b{flex:1;font-size:.8125rem;font-weight:600;line-height:1.25}.ds-store b small{display:block;font-size:.75rem;font-weight:400;color:#8f98d0}.ds-ticks{display:inline-flex;gap:2px}.ds-ticks i{width:6px;height:14px;border-radius:2px}.ds-ticks .o{background:#fff}.ds-ticks .i{background:#f6d3dd}.ds-ticks .a{background:#f6e59a}.ds-ticks .off{background:transparent;box-shadow:inset 0 0 0 1px rgba(201,207,238,.4)}"
     },
     {
       "name": "Stage Cards",
@@ -576,6 +669,30 @@
       "css": ".ds-stat{font-family:'Public Sans',system-ui,sans-serif;position:relative;margin:0;width:200px;background:#fbeaf0;border:1px solid #e2aebd;border-radius:8px;padding:12px 16px;display:flex;flex-direction:column;gap:2px;color:#141b4d;transition:transform 180ms cubic-bezier(.2,.8,.2,1),box-shadow 180ms ease-out}.ds-stat:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(20,27,77,.1)}.ds-stat dt{font-size:.75rem;color:#3f4884;display:flex;justify-content:space-between;align-items:center;gap:6px}.ds-stat a{color:inherit;text-decoration:none}.ds-stat a::after{content:'';position:absolute;inset:0;border-radius:8px}.ds-stat a:focus-visible{outline:none}.ds-stat a:focus-visible::after{box-shadow:0 0 0 3px rgba(30,42,120,.35)}.ds-stat .v{margin:0;font-size:1.125rem;font-weight:700;font-variant-numeric:tabular-nums}.ds-stat .c{margin:4px 0 0;font-size:.75rem;font-weight:600;color:#1e2a78}.ds-stat:hover .c{text-decoration:underline}.ds-ply{height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;border:1px solid #e2aebd;background:#f6d3dd;display:inline-flex;align-items:center}"
     },
     {
+      "name": "Store Tag",
+      "kind": "chip",
+      "refersTo": "store-mark-sm",
+      "description": "Store identity by outlined carbon monogram, name and marketplace; never a colour.",
+      "html": "<span class=\"ds-tags\"><span class=\"ds-tag\"><i class=\"ds-sm\">HU</i><span>Herbal Utama</span><span class=\"mp\">Shopee</span></span><span class=\"ds-tag\"><i class=\"ds-sm\">HL</i><span>Herbal Live</span><span class=\"mp\">TikTok</span></span><i class=\"ds-md\">HH</i></span>",
+      "css": ".ds-tags{font-family:'Public Sans',system-ui,sans-serif;display:inline-flex;gap:16px;align-items:center}.ds-tag{display:inline-flex;align-items:center;gap:6px;font-size:.8125rem;color:#141b4d;white-space:nowrap}.ds-tag .mp{font-size:.75rem;color:#5a628f}.ds-sm,.ds-md{flex:none;display:inline-grid;place-items:center;font-style:normal;font-weight:800;letter-spacing:.02em;color:#1e2a78;background:#fff;border:1px solid currentColor}.ds-sm{width:22px;height:22px;border-radius:4px;font-size:.625rem}.ds-md{width:32px;height:32px;border-radius:6px;border-width:1.5px;font-size:.75rem}"
+    },
+    {
+      "name": "View Tabs and Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented-active",
+      "description": "Underline view tabs with date-basis captions; segmented control for grain and marketplace switches.",
+      "html": "<div class=\"ds-wrap\"><div class=\"ds-tabs\" role=\"tablist\"><button role=\"tab\" aria-selected=\"false\">Profit<small>per tanggal pesanan</small></button><button role=\"tab\" aria-selected=\"true\">Cashflow<small>per tanggal uang bergerak</small></button></div><div class=\"ds-seg\" role=\"group\"><button aria-pressed=\"false\">Harian</button><button aria-pressed=\"true\">Mingguan</button><button aria-pressed=\"false\">Bulanan</button></div></div>",
+      "css": ".ds-wrap{font-family:'Public Sans',system-ui,sans-serif;display:flex;flex-direction:column;gap:16px;color:#141b4d}.ds-tabs{display:flex;gap:8px;border-bottom:1px solid #b6bcdd}.ds-tabs button{font-family:inherit;border:0;background:none;padding:8px 16px 12px;margin-bottom:-1px;border-bottom:3px solid transparent;font-size:1rem;font-weight:700;color:#5a628f;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;text-align:left;transition:color 150ms ease-out,border-color 150ms ease-out}.ds-tabs small{font-size:.75rem;font-weight:500;color:#5a628f}.ds-tabs button:hover{color:#141b4d}.ds-tabs button[aria-selected=true]{color:#141b4d;border-bottom-color:#1e2a78}.ds-seg{display:inline-flex;gap:2px;padding:3px;border-radius:8px;background:#fff;border:1px solid #b6bcdd;align-self:flex-start}.ds-seg button{font-family:inherit;height:32px;padding:0 12px;border:0;border-radius:6px;background:transparent;color:#3f4884;font-size:.8125rem;font-weight:600;cursor:pointer}.ds-seg button:hover{color:#141b4d;background:#e9ebf4}.ds-seg button[aria-pressed=true]{background:#1e2a78;color:#fff}.ds-tabs button:focus-visible,.ds-seg button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}"
+    },
+    {
+      "name": "Cash Stat Strip",
+      "kind": "card",
+      "refersTo": "stat-tile-result",
+      "description": "Catatan tile beside carbon result tiles; negatives on carbon use loss-on-carbon.",
+      "html": "<dl class=\"ds-stats\"><div class=\"ds-st m\"><dt>Pengeluaran dicatat<span class=\"ds-ply\">Catatan</span></dt><dd>−Rp31.500.000</dd></div><div class=\"ds-st r\"><dt>Arus kas bersih</dt><dd class=\"neg\">−Rp4.214.285</dd></div><div class=\"ds-st r\"><dt>Saldo akhir</dt><dd>Rp5.785.715</dd></div></dl>",
+      "css": ".ds-stats{font-family:'Public Sans',system-ui,sans-serif;margin:0;display:grid;grid-template-columns:repeat(3,180px);gap:12px;color:#141b4d}.ds-st{border-radius:8px;padding:12px 16px;border:1px solid;display:flex;flex-direction:column;gap:2px}.ds-st dt{font-size:.75rem;color:#3f4884;display:flex;justify-content:space-between;gap:6px;align-items:center}.ds-st dd{margin:0;font-size:1.125rem;font-weight:700;font-variant-numeric:tabular-nums}.ds-st.m{background:#f4effb;border-color:#c6b4e6}.ds-st.r{background:#1e2a78;border-color:#1e2a78;color:#fff}.ds-st.r dt{color:#c9cfee}.ds-st.r dd.neg{color:#ffb3c4}.ds-ply{height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;letter-spacing:.02em;border:1px solid #c6b4e6;background:#e4daf5;color:#141b4d;display:inline-flex;align-items:center}"
+    },
+    {
       "name": "Panel",
       "kind": "card",
       "refersTo": "panel",
@@ -586,23 +703,34 @@
   ],
   "narrative": {
     "northStar": "Nota Rangkap (the three-ply carbon receipt book)",
-    "overview": "The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the binding and the writing, and a coloured ply for each copy. Here every source file is a ply. Order is the white top sheet, Income the pink copy, Iklan (ads) the yellow copy, HPP (the seller's own cost) the pale blue copy. Any figure, card, tile, file card, guide card or trace that comes from one file is tinted in that file's ply colour and carries a small ply chip naming it. Provenance is the decoration; there is no other ornament.\n\nDensity is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the stacked file plies, a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.",
+    "overview": "The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the binding and the writing, and a coloured ply for each copy. Here every source file is a ply. Order is the white top sheet, Income the pink copy, Iklan (ads) the yellow copy, HPP (the seller's own cost) the pale blue copy, Catatan (the seller's own expense notes) the lavender copy. Any figure, card, tile, file card, guide card or trace that comes from one file is tinted in that file's ply colour and carries a small ply chip naming it. Provenance is the decoration; there is no other ornament. One seller may run several stores (Shopee and TikTok Shop mixed); stores are told apart by an outlined carbon monogram and a name, never by a colour, because colour already means \"which file\".\n\nDensity is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the store list (each store showing three tiny ply ticks for its files), a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.",
     "keyCharacteristics": [
       "Carbon-blue rail and ink; cool blue-tinted ground (never warm paper).",
-      "Four ply colours used strictly as source codes, as a full fill (chips, rail plies) or a wash (cards, tiles, traces).",
+      "Five ply colours used strictly as source codes, as a full fill (chips, rail ticks) or a wash (cards, tiles, traces).",
+      "Stores identified by outlined carbon monograms and names, never by colour.",
       "Public Sans throughout, weights 400 to 800, tabular numerals on every figure and table.",
       "Stage card opens a trace panel of the rows that produced it, in the same ply wash.",
-      "Loss/gain colour is semantic only; the result card is solid carbon."
+      "Loss/gain colour is semantic only; computed results (profit, net cash flow, closing balance) sit on solid carbon."
     ],
     "rules": [
       {
         "name": "The Ply Provenance Rule",
-        "body": "A ply colour means \"this came from that file\". Any figure derived from one source sits on that ply's wash and carries its chip; never use Income pink, Iklan yellow or HPP blue as decoration on unrelated content.",
+        "body": "A ply colour means \"this came from that file\". Any figure derived from one source sits on that ply's wash and carries its chip; never use Income pink, Iklan yellow, HPP blue or Catatan lavender as decoration on unrelated content.",
         "section": "colors"
       },
       {
         "name": "The Carbon Result Rule",
-        "body": "The computed bottom line (Profit real) is never a ply: it sits on solid carbon, because it is the sum of all copies, not one of them.",
+        "body": "The computed bottom line (Profit real, Arus kas bersih, Saldo akhir) is never a ply: it sits on solid carbon, because it is the sum of all copies, not one of them. A negative result on carbon uses loss-on-carbon.",
+        "section": "colors"
+      },
+      {
+        "name": "The Own Notes Rule",
+        "body": "Catatan lavender marks only figures the seller typed in themselves as expense notes; marketplace-derived costs never take it, and seller-entered cost per product stays HPP blue.",
+        "section": "colors"
+      },
+      {
+        "name": "The Monogram Rule",
+        "body": "A store is identified by its outlined carbon initials and its name (plus marketplace in muted text), never by a hue; no per-store colour coding in tables, charts or the rail.",
         "section": "colors"
       },
       {
@@ -633,13 +761,16 @@
     ],
     "dos": [
       "Do tint any single-source figure, card or trace with its ply wash and edge, and add its ply chip.",
-      "Do keep the computed bottom line on solid carbon.",
+      "Do keep the computed bottom line (profit, net cash, closing balance) on solid carbon, with loss-on-carbon for negatives.",
+      "Do identify a store with its monogram and name, and add the marketplace in muted text where stores mix.",
       "Do use tabular numerals for every rupiah and count.",
-      "Do stack per-row tables into labelled ledger lines at ≤560px (`table.ledger` with `data-label` cells).",
+      "Do stack per-row tables into labelled ledger lines at ≤560px (`table.ledger` with `data-label` cells), one label-left / value-right line per figure.",
       "Do express lift only on interaction: 2px rise plus hover shadow on clickable cards."
     ],
     "donts": [
       "Don't use ply colours as decoration on content that has no source file.",
+      "Don't give stores their own colours; colour already means source file.",
+      "Don't use Catatan lavender for anything the seller did not type in as an expense note.",
       "Don't colour neutral totals red or green; loss and gain colours are reserved for signed values and states.",
       "Don't put the panel ambient shadow on ply-tinted sheets.",
       "Don't add uppercase tracked labels or eyebrow text above headings; labels stay sentence case.",

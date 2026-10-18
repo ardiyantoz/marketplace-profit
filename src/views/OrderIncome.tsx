@@ -1,13 +1,13 @@
 import { useMemo, useState, type ReactNode } from 'react';
-import { Notice, Ply, Stat } from '../components/ui';
-import type { MonthFilter, Summary } from '../lib/compute';
+import { Notice, Ply, Stat, StoreTag } from '../components/ui';
+import type { MonthFilter, StoreFilter, Summary } from '../lib/compute';
 import { dateLabel, num, rp } from '../lib/format';
 import type { MarketplaceInfo } from '../lib/marketplace';
 import type { Dataset } from '../lib/types';
 
 const PAGE = 50;
 
-export function OrderIncome({ M, data, summary, month, toolbar }: { M: MarketplaceInfo; data: Dataset; summary: Summary; month: MonthFilter; toolbar: ReactNode }) {
+export function OrderIncome({ M, data, summary, month, store, toolbar }: { M: MarketplaceInfo; data: Dataset; store: StoreFilter; summary: Summary; month: MonthFilter; toolbar: ReactNode }) {
   const [q, setQ] = useState('');
   const [showCancelled, setShowCancelled] = useState(false);
   const [orderLimit, setOrderLimit] = useState(PAGE);
@@ -15,13 +15,15 @@ export function OrderIncome({ M, data, summary, month, toolbar }: { M: Marketpla
 
   const needle = q.trim().toLowerCase();
   const orders = useMemo(() => {
-    const base = data.orders.filter((o) => (month === 'all' || o.month === month) && (showCancelled || !o.cancelled));
+    const base = data.orders.filter((o) => (store === 'all' || o.storeId === store) && (month === 'all' || o.month === month) && (showCancelled || !o.cancelled));
     if (!needle) return base;
     return base.filter((o) => o.orderNo.toLowerCase().includes(needle) || o.product.toLowerCase().includes(needle) || o.buyer.toLowerCase().includes(needle));
-  }, [data.orders, month, showCancelled, needle]);
+  }, [data.orders, month, store, showCancelled, needle]);
 
   const income = useMemo(() => (needle ? summary.income.filter((r) => r.orderNo.toLowerCase().includes(needle)) : summary.income), [summary.income, needle]);
-  const cancelled = data.orders.filter((o) => o.cancelled && (month === 'all' || o.month === month)).length;
+  const cancelled = data.orders.filter((o) => o.cancelled && (store === 'all' || o.storeId === store) && (month === 'all' || o.month === month)).length;
+  const multi = data.stores.length > 1 && store === 'all';
+  const storeOf = new Map(data.stores.map((s) => [s.id, s]));
   const f = summary.fees;
 
   return (
@@ -65,6 +67,7 @@ export function OrderIncome({ M, data, summary, month, toolbar }: { M: Marketpla
           <table>
             <thead>
               <tr>
+                {multi && <th>Toko</th>}
                 <th>No. pesanan</th>
                 <th>Tanggal</th>
                 <th>Produk</th>
@@ -78,7 +81,8 @@ export function OrderIncome({ M, data, summary, month, toolbar }: { M: Marketpla
             </thead>
             <tbody>
               {orders.slice(0, orderLimit).map((o) => (
-                <tr key={`${o.orderNo}-${o.row}`}>
+                <tr key={`${o.storeId}-${o.orderNo}-${o.row}`}>
+                  {multi && <td>{storeOf.get(o.storeId) && <StoreTag store={storeOf.get(o.storeId)!} />}</td>}
                   <td>{o.orderNo}</td>
                   <td>{dateLabel(o.date)}</td>
                   <td className="product">
@@ -125,6 +129,7 @@ export function OrderIncome({ M, data, summary, month, toolbar }: { M: Marketpla
           <table>
             <thead>
               <tr>
+                {multi && <th>Toko</th>}
                 <th>No. pesanan</th>
                 <th>Dana dilepas</th>
                 <th className="r">{M.fees.admin}</th>
@@ -138,7 +143,8 @@ export function OrderIncome({ M, data, summary, month, toolbar }: { M: Marketpla
             </thead>
             <tbody>
               {income.slice(0, incomeLimit).map((r) => (
-                <tr key={`${r.orderNo}-${r.row}`}>
+                <tr key={`${r.storeId}-${r.orderNo}-${r.row}`}>
+                  {multi && <td>{storeOf.get(r.storeId) && <StoreTag store={storeOf.get(r.storeId)!} />}</td>}
                   <td>{r.orderNo}</td>
                   <td>{dateLabel(r.settled)}</td>
                   <td className="r">{rp(-r.admin)}</td>

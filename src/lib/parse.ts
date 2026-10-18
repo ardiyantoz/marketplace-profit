@@ -141,6 +141,7 @@ function parseOrders(rows: Row[], h: number, name: string): ParsedFile {
     const unitOriginal = toNumber(cell(r, c.unitOriginal));
     const discounted = toNumber(cell(r, c.unitDiscounted));
     out.push({
+      storeId: '', // assigned when the file is attached to a store
       orderNo,
       date,
       month: Number.isNaN(date.getTime()) ? 'tanpa-tanggal' : monthKey(date),
@@ -176,6 +177,7 @@ function parseIncome(rows: Row[], h: number, name: string): ParsedFile {
     if (!orderNo || /total/i.test(orderNo)) continue;
     const shipNet = ship.reduce((s, j) => s + toNumber(r[j]), 0);
     out.push({
+      storeId: '', // assigned when the file is attached to a store
       orderNo,
       settled: toDate(cell(r, c.settled)),
       admin: cost(r, c.admin),
@@ -204,6 +206,7 @@ function parseAds(rows: Row[], h: number, name: string): ParsedFile {
     if (!spend) continue;
     const date = toDate(cell(r, c.date));
     out.push({
+      storeId: '',
       date,
       month: date ? monthKey(date) : null,
       campaign: text(r, c.campaign),
@@ -280,6 +283,7 @@ function parseTiktokOrders(rows: Row[], h: number, name: string): ParsedFile {
     const date = toDate(cell(r, c.date)) ?? new Date(NaN);
     const status = text(r, c.status);
     out.push({
+      storeId: '', // assigned when the file is attached to a store
       orderNo,
       date,
       month: Number.isNaN(date.getTime()) ? 'tanpa-tanggal' : monthKey(date),
@@ -317,6 +321,7 @@ function parseTiktokSettlement(rows: Row[], h: number, name: string): ParsedFile
     if (!orderNo || !/\d/.test(orderNo)) continue;
     const shipNet = c.sellerShipping >= 0 ? toNumber(cell(r, c.sellerShipping)) : shipping.reduce((s, j) => s + toNumber(r[j]), 0);
     out.push({
+      storeId: '', // assigned when the file is attached to a store
       orderNo,
       settled: toDate(cell(r, c.settled)),
       admin: costOf(r, commission),

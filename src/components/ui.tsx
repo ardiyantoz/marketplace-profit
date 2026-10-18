@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import type { MarketplaceInfo } from '../lib/marketplace';
-import type { Source } from '../lib/types';
+import { MARKETPLACES, type MarketplaceInfo } from '../lib/marketplace';
+import type { Source, Store } from '../lib/types';
 
-export const SOURCE_LABEL: Record<Source, string> = { order: 'Order', income: 'Income', ads: 'Iklan', hpp: 'HPP' };
+export const SOURCE_LABEL: Record<Source, string> = { order: 'Order', income: 'Income', ads: 'Iklan', hpp: 'HPP', manual: 'Catatan' };
 
 export function Ply({ source }: { source: Source }) {
   return (
@@ -33,6 +33,9 @@ const paths = {
   sort: 'M8 9l4-4 4 4M16 15l-4 4-4-4',
   lock: 'M7 11V7a5 5 0 0 1 10 0v4M5 11h14v10H5z',
   up: 'M12 19V5m0 0-6 6m6-6 6 6',
+  plus: 'M12 5v14M5 12h14',
+  trash: 'M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3',
+  merge: 'M6 4v5a6 6 0 0 0 6 6h6m0 0-3-3m3 3-3 3M6 20v-5',
   down: 'M12 5v14m0 0-6-6m6 6 6-6',
 };
 
@@ -92,5 +95,30 @@ export function Stat({ source, label, value, href }: { source: Source; label: st
         </dd>
       )}
     </div>
+  );
+}
+
+/** A store's monogram: identity by initials, never by colour (colour means "source file"). */
+export function StoreMark({ store, size = 'md' }: { store: Store; size?: 'sm' | 'md' }) {
+  const initials = store.name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]!.toUpperCase())
+    .join('');
+  return (
+    <span className={`store-mark ${size}`} title={`${store.name} · ${MARKETPLACES[store.marketplace].name}`} aria-hidden="true">
+      {initials || '?'}
+    </span>
+  );
+}
+
+export function StoreTag({ store }: { store: Store }) {
+  return (
+    <span className="store-tag">
+      <StoreMark store={store} size="sm" />
+      <span>{store.name}</span>
+      <span className="mp">{store.marketplace === 'tiktok' ? 'TikTok' : 'Shopee'}</span>
+    </span>
   );
 }

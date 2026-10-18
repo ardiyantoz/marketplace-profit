@@ -12,7 +12,7 @@ delegated: Vite + React + TypeScript, plain CSS with custom properties, SheetJS 
 
 ## Users
 
-A solo Indonesian online seller (small to mid shop, roughly 50 to 5,000 orders a month) checking the real profit of their own Shopee store. They are not accountants. They export files from Shopee Seller Centre, usually at month end or when sales feel "busy but broke", and work on a laptop, sometimes checking results on a phone.
+A solo Indonesian online seller (small to mid shop, roughly 50 to 5,000 orders a month) checking the real profit of their own stores. Many run one main store plus several smaller stores selling the same products, across Shopee and TikTok Shop. They are not accountants. They export files from Shopee Seller Centre, usually at month end or when sales feel "busy but broke", and work on a laptop, sometimes checking results on a phone.
 
 ## Product Purpose
 
@@ -31,8 +31,10 @@ Shopee shows "Total Penghasilan", which sellers mistake for profit. This tool su
 
 ## Capabilities and Constraints
 
-- Shopee and TikTok Shop (incl. Tokopedia stores on TikTok Shop Seller Center) on one data model; one marketplace per analysis. Lazada later.
-- All parsing and computation in the browser; no backend, no login, no server storage.
+- Several stores per analysis, Shopee and TikTok Shop mixed (incl. Tokopedia stores on TikTok Shop Seller Center); one upload card per store. Lazada later.
+- Same products across stores are merged manually; HPP is set once per merged product.
+- Dashboard shows combined totals, a per-store comparison and a store filter; a Cashflow sub-tab shows money by release date, ad spend, manual expenses (stock purchases are cash-only; operating costs also reduce profit), opening and running balance, and estimated pending funds.
+- All parsing and computation in the browser; no backend, no login. All data, including order rows, is kept in this browser's IndexedDB at the user's request.
 - Month filter and month-over-month comparison.
 - Undecided: HPP varying by period, ad spend allocation rule, accrual vs settlement-date month.
 

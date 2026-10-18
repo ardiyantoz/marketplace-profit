@@ -1,6 +1,5 @@
 import { monthKey } from './format';
-import type { Marketplace } from './marketplace';
-import type { AdRow, Dataset, HppMap, IncomeRow, OrderLine } from './types';
+import { rawKey, type AdRow, type Dataset, type Expense, type IncomeRow, type OrderLine, type Settings, type Store } from './types';
 
 // Synthetic demo shop. Every figure here is invented and labelled "Data contoh" in the UI.
 const PRODUCTS: { name: string; price: number; hpp: number | null; weight: number; ads: boolean }[] = [
@@ -63,37 +62,44 @@ function pick<T>(r: () => number, items: [T, number][]): T {
   return items[items.length - 1][0];
 }
 
-export function sampleHpp(): HppMap {
-  const out: HppMap = {};
-  for (const p of PRODUCTS) if (p.hpp !== null) out[p.name] = p.hpp;
-  return out;
+const shortOf = (name: string) => name.split(' - ')[0];
+
+interface StorePlan {
+  store: Store;
+  seed: number;
+  products: number[]; // indexes into PRODUCTS
+  rename: (name: string) => string; // how this store titles the product
+  price: number; // price factor
+  volume: number; // order volume factor
 }
 
-export function sampleDataset(mp: Marketplace = 'shopee'): Dataset {
-  const tiktok = mp === 'tiktok';
-  const r = rng(tiktok ? 20260719 : 20260717);
+function generate(plan: StorePlan) {
+  const { store } = plan;
+  const tiktok = store.marketplace === 'tiktok';
+  const r = rng(plan.seed);
   const orders: OrderLine[] = [];
   const income: IncomeRow[] = [];
   const ads: AdRow[] = [];
-  const productWeights = PRODUCTS.map((p) => [p, p.weight] as [typeof p, number]);
-  const plan: [number, number, number][] = [
-    [2026, 4, 40],
-    [2026, 5, 46],
-    [2026, 6, 56],
+  const catalog = plan.products.map((i) => PRODUCTS[i]);
+  const productWeights = catalog.map((p) => [p, p.weight] as [typeof p, number]);
+  const plan3: [number, number, number][] = [
+    [2026, 4, Math.round(40 * plan.volume)],
+    [2026, 5, Math.round(46 * plan.volume)],
+    [2026, 6, Math.round(56 * plan.volume)],
   ];
   let seq = 0;
   let orderRow = 2;
   let incomeRow = 7;
   let adRow = 2;
-  for (const [y, m, count] of plan) {
+  for (const [y, m, count] of plan3) {
     const days = new Date(y, m + 1, 0).getDate();
     for (let i = 0; i < count; i++) {
       seq++;
       const day = 1 + Math.floor(r() * days);
       const date = new Date(y, m, day, 8 + Math.floor(r() * 14), Math.floor(r() * 60));
       const orderNo = tiktok
-        ? `5794${String(m + 1).padStart(2, '0')}${String(day).padStart(2, '0')}${String(seq * 104729).padStart(10, '0')}`
-        : `26${String(m + 1).padStart(2, '0')}${String(day).padStart(2, '0')}${(seq * 7919).toString(36).toUpperCase().padStart(6, 'X')}`;
+        ? `5794${pad2(m + 1)}${pad2(day)}${String(seq * 104729).padStart(10, '0')}`
+        : `26${pad2(m + 1)}${pad2(day)}${(seq * 7919 + plan.seed).toString(36).toUpperCase().slice(-6).padStart(6, 'X')}`;
       const cancelled = r() < 0.05;
       const payment = pick(r, tiktok ? PAYMENTS_TIKTOK : PAYMENTS);
       const buyer = `${BUYERS[Math.floor(r() * BUYERS.length)]}${Math.floor(r() * 9000 + 1000)}`;
@@ -105,27 +111,29 @@ export function sampleDataset(mp: Marketplace = 'shopee'): Dataset {
         if (chosen.has(p.name)) continue;
         chosen.add(p.name);
         const qty = r() < 0.15 ? 2 : 1;
-        const discount = r() < 0.4 ? Math.round((p.price * (0.01 + r() * 0.05)) / 100) * 100 : 0;
-        const unit = p.price - discount;
+        const price = Math.round((p.price * plan.price) / 500) * 500;
+        const discount = r() < 0.4 ? Math.round((price * (0.01 + r() * 0.05)) / 100) * 100 : 0;
+        const unit = price - discount;
         orderSales += unit * qty;
         orders.push({
+          storeId: store.id,
           orderNo,
           date,
           month: monthKey(date),
           status: cancelled ? (tiktok ? 'Dibatalkan' : 'Batal') : 'Selesai',
           cancelled,
-          product: p.name,
+          product: plan.rename(p.name),
           variant: '',
           qty,
-          unitOriginal: p.price,
+          unitOriginal: price,
           unitDiscounted: unit,
           payment,
           buyer,
           row: orderRow++,
         });
       }
-      const lateJuly = m === 6 && day > 27;
-      if (cancelled || lateJuly) continue;
+      const late = m === 6 && day > 27;
+      if (cancelled || late) continue;
       // Fee rates are illustrative, not either marketplace's real tariff.
       const admin = Math.round(orderSales * (tiktok ? 0.08 : 0.076));
       const service = tiktok ? Math.round(Math.min(orderSales * 0.04, 15000)) : Math.round(Math.min(orderSales * 0.07, 20000));
@@ -136,6 +144,7 @@ export function sampleDataset(mp: Marketplace = 'shopee'): Dataset {
       const other = !tiktok && r() < 0.1 ? 1500 : 0;
       const settled = new Date(y, m, Math.min(days, day + 3 + Math.floor(r() * 4)));
       income.push({
+        storeId: store.id,
         orderNo,
         settled,
         admin,
@@ -149,28 +158,78 @@ export function sampleDataset(mp: Marketplace = 'shopee'): Dataset {
         row: incomeRow++,
       });
     }
-    const campaigns = PRODUCTS.filter((p) => p.ads);
     for (let d = 1; d <= days; d++) {
-      for (const c of campaigns) {
-        if (r() < 0.35) continue;
+      for (const c of catalog.filter((p) => p.ads)) {
+        if (r() < 0.35 + (1 - plan.volume) * 0.9) continue;
         const date = new Date(y, m, d);
-        const spend = Math.round((9000 + r() * 22000) / 100) * 100;
-        ads.push({ date, month: monthKey(date), campaign: `${tiktok ? 'GMV Max' : 'Iklan'} ${c.name.split(' - ')[0]}`, product: c.name, spend, gmv: Math.round(spend * (1.5 + r() * 3)), row: adRow++ });
+        const spend = Math.round(((9000 + r() * 22000) * (0.6 + plan.volume * 0.4)) / 100) * 100;
+        ads.push({ storeId: store.id, date, month: monthKey(date), campaign: `${tiktok ? 'GMV Max' : 'Iklan'} ${shortOf(c.name)}`, product: plan.rename(c.name), spend, gmv: Math.round(spend * (1.5 + r() * 3)), row: adRow++ });
       }
     }
   }
-  const meta = (name: string, rows: number, months: string[]) => ({ name, rows, months, warnings: [] });
-  const ms = ['2026-05', '2026-06', '2026-07'];
-  return {
-    orders,
-    income,
-    ads,
-    files: {
-      order: meta(tiktok ? 'Pesanan-TikTokShop.contoh.csv' : 'Order.all.contoh.xlsx', orders.length, ms),
-      income: meta(tiktok ? 'Penyelesaian-TikTokShop.contoh.xlsx' : 'Penghasilan.contoh.xlsx', income.length, ms),
-      ads: meta(tiktok ? 'GMV-Max.contoh.csv' : 'Iklan.contoh.csv', ads.length, ms),
-    },
-    sample: true,
-    marketplace: mp,
+  const meta = (name: string, rows: number) => ({ name, rows, months: ['2026-05', '2026-06', '2026-07'], warnings: [] });
+  store.files = {
+    order: meta(tiktok ? 'Pesanan-TikTokShop.contoh.csv' : 'Order.all.contoh.xlsx', orders.length),
+    income: meta(tiktok ? 'Penyelesaian-TikTokShop.contoh.xlsx' : 'Penghasilan.contoh.xlsx', income.length),
+    ads: meta(tiktok ? 'GMV-Max.contoh.csv' : 'Iklan.contoh.csv', ads.length),
   };
+  return { orders, income, ads };
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** Three fictional stores selling overlapping products, with merges, HPP, expenses and an opening balance. */
+export function sampleState(): { data: Dataset; settings: Settings } {
+  const plans: StorePlan[] = [
+    {
+      store: { id: 'contoh-utama', name: 'Herbal Utama', marketplace: 'shopee', files: {} },
+      seed: 20260717,
+      products: PRODUCTS.map((_, i) => i),
+      rename: (n) => n,
+      price: 1,
+      volume: 1,
+    },
+    {
+      store: { id: 'contoh-hemat', name: 'Herbal Hemat', marketplace: 'shopee', files: {} },
+      seed: 20260721,
+      products: [0, 1, 4, 6, 7, 8, 9],
+      rename: (n) => `${shortOf(n)} Original Murah`,
+      price: 0.9,
+      volume: 0.45,
+    },
+    {
+      store: { id: 'contoh-live', name: 'Herbal Live', marketplace: 'tiktok', files: {} },
+      seed: 20260719,
+      products: [0, 1, 3, 4, 8, 13],
+      rename: (n) => `${shortOf(n)} | Herbal Asli Indonesia`,
+      price: 0.97,
+      volume: 0.6,
+    },
+  ];
+  const data: Dataset = { stores: [], orders: [], income: [], ads: [], sample: true };
+  const settings: Settings = { hpp: {}, merges: {}, expenses: [], opening: { date: '2026-05-01', amount: 10000000 } };
+  for (const plan of plans) {
+    const g = generate(plan);
+    data.stores.push(plan.store);
+    data.orders.push(...g.orders);
+    data.income.push(...g.income);
+    data.ads.push(...g.ads);
+    for (const i of plan.products) {
+      const p = PRODUCTS[i];
+      const merged = shortOf(p.name);
+      settings.merges[rawKey(plan.store.id, plan.rename(p.name))] = merged;
+      if (p.hpp !== null) settings.hpp[`g::${merged}`] = p.hpp;
+    }
+  }
+  const exp = (date: string, category: Expense['category'], amount: number, storeId: string, note: string): Expense => ({ id: `contoh-${date}-${category}-${storeId}`, date, category, amount, storeId, note });
+  for (const m of ['05', '06', '07']) {
+    settings.expenses.push(
+      exp(`2026-${m}-02`, 'stok', 5500000, 'all', 'Belanja bahan rempah'),
+      exp(`2026-${m}-16`, 'stok', 3000000, 'all', 'Belanja matcha'),
+      exp(`2026-${m}-25`, 'gaji', 1500000, 'all', 'Gaji admin packing'),
+      exp(`2026-${m}-10`, 'packaging', 350000, 'contoh-utama', 'Bubble wrap dan kardus'),
+      exp(`2026-${m}-12`, 'packaging', 150000, 'contoh-live', 'Pouch live'),
+    );
+  }
+  return { data, settings };
 }
