@@ -76,7 +76,7 @@ export function toDate(v: Cell): Date | null {
   }
   const s = String(v ?? '').trim();
   if (!s) return null;
-  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
+  let m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{2}))?/);
   if (m) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] ?? 0), +(m[5] ?? 0));
   m = s.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})(?:\s+(\d{1,2}):(\d{2}))?/);
   if (m) return new Date(+m[3], +m[2] - 1, +m[1], +(m[4] ?? 0), +(m[5] ?? 0));
@@ -117,7 +117,23 @@ function readSheets(buf: ArrayBuffer, csv: boolean): Row[][] {
   // CSV is read as plain text: SheetJS would otherwise turn 18-digit TikTok order IDs
   // into floats and read dd/mm/yyyy dates as US mm/dd.
   const wb = XLSX.read(buf, csv ? { type: 'array', raw: true } : { type: 'array', cellDates: true });
-  return wb.SheetNames.map((n) => XLSX.utils.sheet_to_json<Row>(wb.Sheets[n], { header: 1, raw: true, defval: null }));
+  return wb.SheetNames.map((n) => XLSX.utils.sheet_to_json<Row>(fitRange(wb.Sheets[n]), { header: 1, raw: true, defval: null }));
+}
+
+// TikTok Shop exports declare a smaller sheet size than they fill (A1:X19 with data up to
+// column BY), and SheetJS trusts the declared size. Measure the cells that are really there.
+function fitRange(ws: XLSX.WorkSheet): XLSX.WorkSheet {
+  const range = { s: { r: Infinity, c: Infinity }, e: { r: -1, c: -1 } };
+  for (const key of Object.keys(ws)) {
+    if (key[0] === '!') continue;
+    const { r, c } = XLSX.utils.decode_cell(key);
+    range.s.r = Math.min(range.s.r, r);
+    range.s.c = Math.min(range.s.c, c);
+    range.e.r = Math.max(range.e.r, r);
+    range.e.c = Math.max(range.e.c, c);
+  }
+  if (range.e.r >= 0) ws['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: range.e });
+  return ws;
 }
 
 function months(dates: (Date | null)[]): string[] {
@@ -252,17 +268,25 @@ const TT_ORDER_COLS = {
 const TT_SKU_MARKERS = ['skuid', 'idsku', 'sellersku', 'skupenjual', 'skusubtotalafterdiscount', 'subtotalskusetelahdiskon'];
 
 const TT_SETTLE_ID = ['orderadjustmentid', 'idpesananpenyesuaian', 'orderid', 'idpesanan'];
-const TT_PAYOUT = ['totalsettlementamount', 'jumlahpenyelesaiantotal', 'totalpenyelesaian', 'jumlahpenyelesaian'];
+const TT_PAYOUT = ['totalsettlementamount', 'jumlahpenyelesaiantotal', 'totalpenyelesaian', 'jumlahpenyelesaian', 'jumlahpenyelesaianpembayaran'];
 const TT_SETTLE = {
   orderNo: TT_SETTLE_ID,
-  settled: ['ordersettledtime', 'waktupenyelesaianpesanan', 'settledtime', 'waktupenyelesaian'],
+  settled: ['ordersettledtime', 'waktupenyelesaianpesanan', 'settledtime', 'waktupenyelesaian', 'waktupembayaranpesanan'],
   payout: TT_PAYOUT,
-  sellerShipping: ['sellershippingfee', 'biayapengirimanpenjual'],
+  sellerShipping: ['sellershippingfee', 'biayapengirimanpenjual', 'ongkir'],
+  totalFees: ['totalfees', 'totalbiaya'],
 };
 const TT_COMMISSION = ['tiktokshopcommissionfee', 'biayakomisitiktokshop', 'platformcommissionfee', 'biayakomisiplatform', 'dynamiccommission', 'komisidinamis'];
-const TT_SERVICE = ['sfpservicefee', 'biayalayanansfp', 'voucherxtraservicefee', 'biayalayananvoucherxtra', 'liveservicefee', 'biayalayananlive', 'bonuscashbackservicefee', 'biayalayananbonuscashback'];
-const TT_AFFILIATE = ['affiliatecommission', 'komisiafiliasi', 'affiliatepartnercommission', 'komisimitraafiliasi', 'affiliateshopadscommission', 'komisiiklantokoafiliasi'];
-const TT_TRANSACTION = ['transactionfee', 'biayatransaksi'];
+const TT_SERVICE = [
+  'sfpservicefee', 'biayalayanansfp', 'voucherxtraservicefee', 'biayalayananvoucherxtra', 'liveservicefee', 'biayalayananlive', 'bonuscashbackservicefee', 'biayalayananbonuscashback',
+  // Seller Center Tokopedia & TikTok Shop, Indonesian export (2026)
+  'biayalayananpreorder', 'biayalayananmall', 'biayalayananprogrambebasongkir', 'biayalayananprogramgrowthxtra', 'biayalayanankhususlive', 'biayalayanangrowthxtraprogramsuper',
+  'biayalayananprogrameams', 'biayalayananbrandscrazydealflashsale', 'biayadilayanitokopedia', 'biayapenanganandilayanitokopedia', 'biayalayanankhususplatform', 'biayalayananpenginstalan',
+];
+const TT_AFFILIATE = ['affiliatecommission', 'komisiafiliasi', 'affiliatepartnercommission', 'komisimitraafiliasi', 'affiliateshopadscommission', 'komisiiklantokoafiliasi', 'komisiiklantokomitraafiliasi', 'depositkomisiafiliasi', 'pengembaliandanakomisiafiliasi'];
+const TT_TRANSACTION = ['transactionfee', 'biayatransaksi', 'biayapembayaran', 'biayapemrosesanpesanan', 'creditcardinstallmenthandlingfee', 'biayaprogrampaylater'];
+// GMV Max is ad spend taken from the settlement; the GMV Max ads file already counts it.
+const TT_ADS_IN_SETTLEMENT = ['biayaiklangmvmax', 'gmvmaxadfee'];
 const TT_SHIPPING = ['actualshippingfee', 'biayapengirimanaktual', 'platformshippingfeediscount', 'diskonbiayapengirimanplatform', 'customershippingfee', 'biayapengirimanpelanggan', 'actualreturnshippingfee', 'biayapengirimanreturaktual'];
 
 function parseTiktokOrders(rows: Row[], h: number, name: string): ParsedFile {
@@ -314,23 +338,31 @@ function parseTiktokSettlement(rows: Row[], h: number, name: string): ParsedFile
   const warnings: string[] = [];
   if (!commission.length) warnings.push('Kolom komisi platform tidak ditemukan.');
   const out: IncomeRow[] = [];
-  const costOf = (r: Row, cols: number[]) => cols.reduce((s, j) => s + Math.max(0, -toNumber(r[j])), 0);
+  const adsInSettlement = group(TT_ADS_IN_SETTLEMENT);
+  // Fees are negative in the export; a refunded fee in the same group offsets it.
+  const costOf = (r: Row, cols: number[]) => Math.max(0, -cols.reduce((s, j) => s + toNumber(r[j]), 0));
   for (let i = h + 1; i < rows.length; i++) {
     const r = rows[i];
     const orderNo = text(r, c.orderNo);
     if (!orderNo || !/\d/.test(orderNo)) continue;
     const shipNet = c.sellerShipping >= 0 ? toNumber(cell(r, c.sellerShipping)) : shipping.reduce((s, j) => s + toNumber(r[j]), 0);
-    out.push({
-      storeId: '', // assigned when the file is attached to a store
-      orderNo,
-      settled: toDate(cell(r, c.settled)),
+    const fees = {
       admin: costOf(r, commission),
       service: costOf(r, service),
       ams: costOf(r, affiliate),
       processing: costOf(r, transaction),
-      shipping: Math.max(0, -shipNet),
+      shipping: -shipNet || 0, // negative when the platform reimbursed more shipping than it charged
+    };
+    // Any fee in "Total Biaya" without a column of its own here (new programmes, tax) lands in "other".
+    const known = fees.admin + fees.service + fees.ams + fees.processing + fees.shipping + costOf(r, adsInSettlement);
+    const other = c.totalFees >= 0 ? Math.max(0, -toNumber(cell(r, c.totalFees)) - known) : 0;
+    out.push({
+      storeId: '', // assigned when the file is attached to a store
+      orderNo,
+      settled: toDate(cell(r, c.settled)),
+      ...fees,
       voucher: 0, // seller discounts are already inside the order's subtotal after discount
-      other: 0,
+      other,
       payout: toNumber(cell(r, c.payout)),
       row: i + 1,
     });
