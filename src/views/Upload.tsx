@@ -15,6 +15,8 @@ interface Props {
   onRemoveStore: (id: string) => void;
   onSample: () => void;
   onReset: () => void;
+  onBackup: () => void;
+  onRestore: (file: File) => Promise<boolean>;
   onNext: () => void;
 }
 
@@ -144,8 +146,10 @@ function StoreCard({ store, errors, busy, onFiles, onUpdate, onRemove }: { store
   );
 }
 
-export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onAddStore, onUpdateStore, onRemoveStore, onSample, onReset, onNext }: Props) {
+export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onAddStore, onUpdateStore, onRemoveStore, onSample, onReset, onBackup, onRestore, onNext }: Props) {
   const [confirmReset, setConfirmReset] = useState(false);
+  const [restoreMsg, setRestoreMsg] = useState<'ok' | 'bad' | null>(null);
+  const restoreInput = useRef<HTMLInputElement>(null);
   const stores = data.sample ? [] : data.stores;
 
   return (
@@ -222,6 +226,33 @@ export function Upload({ data, errors, busy, productsMissingHpp, onFiles, onAddS
           {productsMissingHpp} produk belum punya HPP. Lanjut ke tab Produk &amp; HPP untuk mengisi dan menggabungkan produk yang sama antar toko.
         </Notice>
       )}
+      <section className="backup">
+        <div>
+          <h2>Backup data</h2>
+          <p className="muted">Data hanya ada di browser ini. Simpan file backup secara berkala, lalu pulihkan di sini kalau pindah PC, ganti browser atau riwayat browser terhapus.</p>
+        </div>
+        <div className="toolbar">
+          <button className="btn btn-secondary" onClick={onBackup} disabled={!data.stores.length || data.sample}>
+            Simpan backup
+          </button>
+          <button className="btn btn-ghost" onClick={() => restoreInput.current?.click()}>
+            Pulihkan dari backup
+          </button>
+          <input
+            ref={restoreInput}
+            type="file"
+            accept=".json,application/json"
+            hidden
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              if (file) setRestoreMsg((await onRestore(file)) ? 'ok' : 'bad');
+            }}
+          />
+        </div>
+        {restoreMsg === 'ok' && <Notice tone="info">Backup dipulihkan. Data sebelumnya di browser ini sudah diganti.</Notice>}
+        {restoreMsg === 'bad' && <Notice tone="warn">File ini bukan backup Profit Toko. Pilih file profit-toko-backup-….json.</Notice>}
+      </section>
       <p className="muted">
         <Icon name="lock" size={14} /> File dibaca dan disimpan di browser ini saja. Tidak ada yang dikirim ke server.
       </p>

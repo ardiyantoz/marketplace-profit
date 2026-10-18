@@ -2,7 +2,7 @@
 
 Dashboard profit dan cashflow untuk banyak toko Shopee dan TikTok Shop sekaligus (termasuk toko Tokopedia yang sudah pindah ke TikTok Shop Seller Center). Tambah satu kartu per toko, upload file pesanan, penghasilan/penyelesaian dan iklan, gabungkan produk yang sama antar toko, isi HPP sekali, lalu lihat profit gabungan dan per toko, cashflow mingguan, dan saran perbaikan yang diurutkan dari dampak rupiah terbesar.
 
-Semua file dibaca dan dihitung di browser. Tidak ada server dan tidak ada data yang dikirim ke mana pun. Toko, data pesanan, HPP, produk gabungan, catatan pengeluaran dan saldo awal disimpan di IndexedDB browser ini (`src/lib/storage.ts`), jadi tidak perlu upload ulang. Tombol "Hapus semua data" di tab Upload menghapusnya.
+Semua file dibaca dan dihitung di browser. Tidak ada server dan tidak ada data yang dikirim ke mana pun. Toko, data pesanan, HPP, produk gabungan, catatan pengeluaran dan saldo awal disimpan di IndexedDB browser ini (`src/lib/storage.ts`), jadi tidak perlu upload ulang. Tombol "Hapus semua data" di tab Upload menghapusnya. Data tidak sync antar browser atau PC; pakai **Simpan backup** / **Pulihkan dari backup** di tab Upload untuk memindahkannya (satu file `.json`).
 
 ## Menjalankan
 
@@ -14,6 +14,14 @@ npm run typecheck
 ```
 
 Belum punya file Shopee? Klik **Pakai data contoh** di tab Upload data. Data contoh adalah toko herbal fiktif dan selalu ditandai "Data contoh".
+
+## Deploy ke Netlify
+
+`netlify.toml` sudah berisi perintah build (`npm run build`) dan folder hasil (`dist`).
+
+1. Masuk ke app.netlify.com, pilih **Add new site → Import an existing project → GitHub**, lalu pilih repo `marketplace-profit` (izinkan Netlify mengakses repo ini kalau diminta).
+2. Setting build terbaca otomatis dari `netlify.toml`. Klik **Deploy**.
+3. Setiap push ke `main` otomatis membuat versi baru. Data client tetap tersimpan di browser masing-masing, tidak di Netlify.
 
 ## Struktur
 

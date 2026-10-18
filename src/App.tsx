@@ -5,7 +5,7 @@ import { buildInsights, buildStoreInsights } from './lib/insights';
 import { infoFor, MARKETPLACES, type Marketplace } from './lib/marketplace';
 import { parseFile } from './lib/parse';
 import { sampleState } from './lib/sample';
-import { clearState, loadState, saveState } from './lib/storage';
+import { clearState, downloadBackup, loadState, readBackup, saveState } from './lib/storage';
 import { emptyDataset, emptySettings, productId, type Dataset, type Settings, type Store } from './lib/types';
 import { NoData, StoreMark } from './components/ui';
 import { Guide } from './views/Guide';
@@ -112,6 +112,17 @@ export default function App() {
     setMonth('all');
     setStore('all');
     setErrors({});
+  }, []);
+
+  const restore = useCallback(async (file: File) => {
+    const state = await readBackup(file);
+    if (!state) return false;
+    setData(state.data);
+    setSettings({ ...emptySettings, ...state.settings });
+    setMonth('all');
+    setStore('all');
+    setErrors({});
+    return true;
   }, []);
 
   const addStore = useCallback((marketplace: Marketplace) => {
@@ -304,6 +315,8 @@ export default function App() {
             onRemoveStore={removeStore}
             onSample={useSample}
             onReset={reset}
+            onBackup={() => downloadBackup({ data, settings })}
+            onRestore={restore}
             onNext={() => setTab(products.length ? 'produk' : 'dashboard')}
             productsMissingHpp={missingHpp}
           />

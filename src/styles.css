@@ -413,6 +413,10 @@ tr.loss-row { background: var(--loss-wash); }
 .add-store { border: 2px dashed var(--line-strong); border-radius: var(--radius-lg); padding: var(--s5); display: flex; justify-content: space-between; align-items: center; gap: var(--s4); flex-wrap: wrap; }
 .add-store h2 { font-size: var(--fs-xl); font-weight: 700; }
 .add-store.first { background: var(--surface); }
+.backup { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); padding: var(--s5); display: flex; justify-content: space-between; align-items: center; gap: var(--s4); flex-wrap: wrap; }
+.backup h2 { font-size: var(--fs-xl); font-weight: 700; }
+.backup > div:first-child { flex: 1 1 320px; }
+.backup .notice { flex-basis: 100%; }
 .btn-danger { background: var(--loss); color: #fff; }
 .btn-danger:hover { background: #8f0e2e; }
 
