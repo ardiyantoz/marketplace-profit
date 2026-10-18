@@ -517,6 +517,22 @@
           "#ffe7ad",
           "#fff8e5"
         ]
+      },
+      "income-ink": {
+        "role": "secondary",
+        "displayName": "Income Rose",
+        "canonical": "#c4506d",
+        "tonalRamp": [
+          "#4a1020",
+          "#7a1d36",
+          "#a8324f",
+          "#c4506d",
+          "#d6718b",
+          "#e293a7",
+          "#ebb1c0",
+          "#f7dfe6"
+        ],
+        "note": "Income ply as a data mark on white (released-funds bars in the cash chart, legend). Not text, not a surface."
       }
     },
     "typographyMeta": {

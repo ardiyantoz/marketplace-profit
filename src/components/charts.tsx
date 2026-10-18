@@ -229,7 +229,7 @@ export function CashChart({ periods }: { periods: CashBar[] }) {
         {periods.map((p, i) => (
           <g key={p.key}>
             {p.inflow > 0 && (
-              <rect x={X(i)} y={Y(p.inflow)} width={bw} height={Math.max(1, Y(0) - Y(p.inflow))} rx="2" fill="var(--carbon)">
+              <rect x={X(i)} y={Y(p.inflow)} width={bw} height={Math.max(1, Y(0) - Y(p.inflow))} rx="2" fill="var(--income-ink)">
                 <title>{`${p.label}: masuk ${rpShort(p.inflow)}`}</title>
               </rect>
             )}

@@ -22,6 +22,7 @@ colors:
   ply-ads-wash: "#fbf3cc"
   ply-ads-edge: "#dcc562"
   ads-ink: "#c79a12"
+  income-ink: "#c4506d"
   ply-manual: "#e4daf5"
   ply-manual-wash: "#f4effb"
   ply-manual-edge: "#c6b4e6"
@@ -287,6 +288,7 @@ A carbon-ink blue system with five pastel source plies and a strictly semantic l
 - **Order White** (ply-order, edge ply-order-edge): Order file. Its cards stay white with a blue-grey edge.
 - **Income Pink** (ply-income, wash ply-income-wash, edge ply-income-edge): Income / Laporan Penghasilan file. The fee share bar extends this ply into a pink ramp (deep #a8324f to pale #f7dfe6), one step per fee line.
 - **Iklan Yellow** (ply-ads, wash ply-ads-wash, edge ply-ads-edge): Ads file. Also the system highlight: active rail step, text selection, "Data contoh" tag, empty-HPP input and warning-rank badges.
+- **Income Rose** (income-ink): the Income ply as a data mark on white: released-funds (Dana masuk) bars in the cash chart and their legend swatch. Never text, never a surface.
 - **Iklan Ochre** (ads-ink): the deeper ads tone for data marks that must read on white: ads bars in the cash chart, the ads segment of the cost share bar and their legend swatches. Never text, never a surface.
 - **HPP Pale Blue** (ply-hpp, wash ply-hpp-wash, edge ply-hpp-edge): seller-entered cost. Also the info notice, drop-zone hover ground and the picked-row ground while merging products.
 - **Catatan Lavender** (ply-manual, wash ply-manual-wash, edge ply-manual-edge): the seller's own manual expense notes (salaries, packaging, rent, stock purchases). Chip, operational-cost stage card and trace, "Pengeluaran dicatat" stat tile, the expense-notes panel heading chip. **Catatan Violet** (manual-ink) is its data-mark tone: expense-category bars and the expense bars of the cash chart.
@@ -409,7 +411,7 @@ A row of "Dari omzet sampai profit" buttons, one per stage, each on its ply wash
 A ledger table with one row per store (store tag as a link that sets the store filter), a profit spark track centred on a zero tick with a gain or loss bar, and a total row on the ground colour under a 2px line-strong rule.
 
 ### Cash chart
-Weekly (or daily / monthly) bars around a zero line: inflow up in carbon, ads down in ads-ink, recorded expenses stacked below in manual-ink, and the running balance as a 2px ink line ending in a labelled dot (loss red when negative). Legend swatches are 10px squares in the same tones.
+Weekly (or daily / monthly) bars around a zero line, every series in its source ply: inflow up in income-ink, ads down in ads-ink, recorded expenses stacked below in manual-ink, and the running balance as a 2px ink line ending in a labelled dot (loss red when negative). Legend swatches are 10px squares in the same tones.
 
 ## Do's and Don'ts
 

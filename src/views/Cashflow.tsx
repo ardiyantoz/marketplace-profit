@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { CashChart } from '../components/charts';
-import { Icon, Notice, Ply, Stat, StoreTag } from '../components/ui';
+import { Icon, Notice, Ply, SOURCE_LABEL, Stat, StoreTag } from '../components/ui';
 import { cashflow, CATEGORY_LABEL, type Grain } from '../lib/cashflow';
 import type { MonthFilter, StoreFilter } from '../lib/compute';
 import { dateLabel, num, rp, rpShort } from '../lib/format';
 import { toNumber } from '../lib/parse';
 import type { MarketplaceInfo } from '../lib/marketplace';
-import type { Dataset, Expense, ExpenseCategory, Settings } from '../lib/types';
+import type { Dataset, Expense, ExpenseCategory, Settings, Source, Store } from '../lib/types';
+import type { Cashflow as CashflowData } from '../lib/cashflow';
 
 interface Props {
   M: MarketplaceInfo;
@@ -35,6 +36,8 @@ export function Cashflow({ M, data, settings, onSettings, month, store }: Props)
   const [grain, setGrain] = useState<Grain>('week');
   const [allPeriods, setAllPeriods] = useState(false);
   const [allExpenses, setAllExpenses] = useState(false);
+  const [trace, setTrace] = useState<TraceKind | null>(null);
+  const toggleTrace = (k: TraceKind) => setTrace((t) => (t === k ? null : k));
   const cf = useMemo(() => cashflow(data, settings, grain, month, store), [data, settings, grain, month, store]);
   const storeOf = new Map(data.stores.map((s) => [s.id, s]));
 
@@ -109,8 +112,8 @@ export function Cashflow({ M, data, settings, onSettings, month, store }: Props)
       </div>
 
       <dl className="stats">
-        <Stat source="income" label={`Dana masuk (${M.payoutLabel.toLowerCase()})`} value={rp(cf.inflow)} href="#cash-table" />
-        <Stat source="ads" label="Iklan keluar" value={rp(-cf.ads)} href="#cash-table" />
+        <Stat source="income" label={`Dana masuk (${M.payoutLabel.toLowerCase()})`} value={rp(cf.inflow)} onOpen={() => toggleTrace('inflow')} open={trace === 'inflow'} />
+        <Stat source="ads" label="Iklan keluar" value={rp(-cf.ads)} onOpen={() => toggleTrace('ads')} open={trace === 'ads'} />
         <Stat source="manual" label="Pengeluaran dicatat" value={rp(-cf.expense)} href="#expenses" />
         <div className="stat result">
           <dt>Arus kas bersih</dt>
@@ -120,15 +123,16 @@ export function Cashflow({ M, data, settings, onSettings, month, store }: Props)
           <dt>Saldo akhir</dt>
           <dd className="num">{cf.closing === null ? 'Isi saldo awal' : rp(cf.closing)}</dd>
         </div>
-        <Stat source="income" label="Dana tertahan (estimasi)" value={rp(cf.pending.total)} href="#pending" />
+        <Stat source="income" label="Dana tertahan (estimasi)" value={rp(cf.pending.total)} onOpen={() => toggleTrace('pending')} open={trace === 'pending'} />
       </dl>
+      {trace && <CashTrace kind={trace} cf={cf} storeOf={storeOf} onClose={() => setTrace(null)} />}
 
       <section className="panel" aria-labelledby="cash-chart">
         <div className="panel-head">
           <h2 id="cash-chart">Uang masuk dan keluar</h2>
           <div className="legend">
             <span>
-              <i style={{ background: 'var(--carbon)' }} />
+              <i style={{ background: 'var(--income-ink)' }} />
               Dana masuk
             </span>
             <span>
@@ -371,5 +375,120 @@ export function Cashflow({ M, data, settings, onSettings, month, store }: Props)
         )}
       </section>
     </>
+  );
+}
+
+type TraceKind = 'inflow' | 'ads' | 'pending';
+const TRACE_LIMIT = 200;
+
+/** The rows behind a cash figure, in its ply wash, like the profit traces. */
+function CashTrace({ kind, cf, storeOf, onClose }: { kind: TraceKind; cf: CashflowData; storeOf: Map<string, Store>; onClose: () => void }) {
+  const source: Source = kind === 'ads' ? 'ads' : 'income';
+  const tag = (id: string) => {
+    const st = storeOf.get(id);
+    return st ? <StoreTag store={st} /> : id;
+  };
+  let title = '';
+  let count = 0;
+  let body = null;
+  if (kind === 'inflow') {
+    count = cf.inflowRows.length;
+    title = `${num(count)} pesanan dananya dilepas, total ${rp(cf.inflow)}`;
+    body = (
+      <table className="ledger">
+        <thead>
+          <tr>
+            <th>Dana dilepas</th>
+            <th>Toko</th>
+            <th>No. pesanan</th>
+            <th className="r">Masuk</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cf.inflowRows.slice(0, TRACE_LIMIT).map((r) => (
+            <tr key={`${r.storeId}-${r.orderNo}-${r.row}`}>
+              <td className="product">{dateLabel(r.settled)}</td>
+              <td data-label="Toko">{tag(r.storeId)}</td>
+              <td data-label="No. pesanan">{r.orderNo}</td>
+              <td className="r" data-label="Masuk">
+                <b>{rp(r.payout)}</b>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  } else if (kind === 'ads') {
+    count = cf.adRows.length;
+    title = count ? `${num(count)} baris iklan, total ${rp(cf.ads)}` : 'Belum ada file iklan di periode ini';
+    body = (
+      <table className="ledger">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Toko</th>
+            <th>Iklan</th>
+            <th className="r">Biaya</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cf.adRows.slice(0, TRACE_LIMIT).map((a) => (
+            <tr key={`${a.storeId}-${a.row}-${a.campaign}`}>
+              <td className="product">{dateLabel(a.date)}</td>
+              <td data-label="Toko">{tag(a.storeId)}</td>
+              <td data-label="Iklan">{a.campaign || a.product || '–'}</td>
+              <td className="r" data-label="Biaya">
+                <b>{rp(-a.spend)}</b>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  } else {
+    const lines = [...cf.pending.lines].sort((a, b) => a.date.getTime() - b.date.getTime());
+    count = lines.length;
+    title = `${num(cf.pending.orders)} pesanan belum dilepas, perkiraan ${rp(cf.pending.total)}`;
+    body = (
+      <table className="ledger">
+        <thead>
+          <tr>
+            <th>Tanggal pesanan</th>
+            <th>Toko</th>
+            <th>No. pesanan</th>
+            <th>Produk</th>
+            <th className="r">Omzet</th>
+          </tr>
+        </thead>
+        <tbody>
+          {lines.slice(0, TRACE_LIMIT).map((l) => (
+            <tr key={`${l.storeId}-${l.orderNo}-${l.row}`}>
+              <td className="product">{dateLabel(Number.isNaN(l.date.getTime()) ? null : l.date)}</td>
+              <td data-label="Toko">{tag(l.storeId)}</td>
+              <td data-label="No. pesanan">{l.orderNo}</td>
+              <td data-label="Produk">{l.product.split(/ [-|] /)[0]}</td>
+              <td className="r" data-label="Omzet">
+                {rp(l.qty * l.unitDiscounted)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+  return (
+    <div id="cash-trace" className={`trace ${source}`} role="region" aria-label={`Asal angka dari file ${SOURCE_LABEL[source]}`}>
+      <div className="trace-head">
+        <h3>
+          <Ply source={source} /> {title}
+        </h3>
+        <button className="btn btn-ghost" onClick={onClose}>
+          <Icon name="close" size={16} />
+          Tutup
+        </button>
+      </div>
+      <div className="table-wrap">{body}</div>
+      {count > TRACE_LIMIT && <p className="more muted">Menampilkan {num(TRACE_LIMIT)} baris terbaru dari {num(count)}.</p>}
+    </div>
   );
 }

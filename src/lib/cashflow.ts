@@ -1,6 +1,6 @@
 import { expenseShare, omzetByStoreMonth, type MonthFilter, type StoreFilter } from './compute';
 import { MONTHS_SHORT } from './format';
-import type { Dataset, ExpenseCategory, Settings } from './types';
+import type { AdRow, Dataset, ExpenseCategory, IncomeRow, OrderLine, Settings } from './types';
 
 export type Grain = 'day' | 'week' | 'month';
 
@@ -30,8 +30,11 @@ export interface Cashflow {
   expenseByCategory: Record<ExpenseCategory, number>;
   net: number;
   closing: number | null;
-  pending: { total: number; orders: number; byStore: PendingStore[] };
+  pending: { total: number; orders: number; byStore: PendingStore[]; lines: OrderLine[] };
   undatedAds: number;
+  // The rows behind each figure, for the trace panel.
+  inflowRows: IncomeRow[];
+  adRows: AdRow[];
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -74,10 +77,13 @@ export function cashflow(data: Dataset, settings: Settings, grain: Grain, month:
     return b;
   };
 
+  const inflowRows: IncomeRow[] = [];
   for (const r of data.income) {
     if (!inStore(r.storeId) || !r.settled || !inMonth(r.settled)) continue;
     bucket(periodStart(r.settled, grain)).inflow += r.payout;
+    inflowRows.push(r);
   }
+  const adRows: AdRow[] = [];
   let undatedAds = 0;
   for (const a of data.ads) {
     if (!inStore(a.storeId)) continue;
@@ -85,7 +91,10 @@ export function cashflow(data: Dataset, settings: Settings, grain: Grain, month:
       undatedAds += a.spend;
       continue;
     }
-    if (inMonth(a.date)) bucket(periodStart(a.date, grain)).ads += a.spend;
+    if (inMonth(a.date)) {
+      bucket(periodStart(a.date, grain)).ads += a.spend;
+      adRows.push(a);
+    }
   }
   const omzet = omzetByStoreMonth(data);
   const expenseByCategory: Record<ExpenseCategory, number> = { stok: 0, gaji: 0, packaging: 0, sewa: 0, lainnya: 0 };
@@ -122,6 +131,7 @@ export function cashflow(data: Dataset, settings: Settings, grain: Grain, month:
   // Pending funds: sold, not yet released. Estimated with each store's own fee rate so far.
   const settledKeys = new Set(data.income.map((r) => `${r.storeId}|${r.orderNo}`));
   const byStore: PendingStore[] = [];
+  const pendingLines: OrderLine[] = [];
   for (const s of data.stores) {
     if (!inStore(s.id)) continue;
     const lines = data.orders.filter((o) => o.storeId === s.id && !o.cancelled);
@@ -131,6 +141,7 @@ export function cashflow(data: Dataset, settings: Settings, grain: Grain, month:
     const feeRate = settledSales ? Math.max(0, Math.min(0.6, 1 - settledPayout / settledSales)) : 0.15;
     const open = lines.filter((o) => !settledKeys.has(`${s.id}|${o.orderNo}`));
     if (!open.length) continue;
+    pendingLines.push(...open);
     const sales = open.reduce((t, o) => t + o.qty * o.unitDiscounted, 0);
     const dates = open.map((o) => o.date).filter((d) => !Number.isNaN(d.getTime()));
     byStore.push({
@@ -154,8 +165,10 @@ export function cashflow(data: Dataset, settings: Settings, grain: Grain, month:
     expenseByCategory,
     net: inflow - ads - expense,
     closing: withBalance.length ? withBalance[withBalance.length - 1].balance : null,
-    pending: { total: byStore.reduce((t, p) => t + p.estimate, 0), orders: byStore.reduce((t, p) => t + p.orders, 0), byStore },
+    pending: { total: byStore.reduce((t, p) => t + p.estimate, 0), orders: byStore.reduce((t, p) => t + p.orders, 0), byStore, lines: pendingLines },
     undatedAds,
+    inflowRows: inflowRows.sort((a, b) => (b.settled?.getTime() ?? 0) - (a.settled?.getTime() ?? 0)),
+    adRows: adRows.sort((a, b) => (b.date?.getTime() ?? 0) - (a.date?.getTime() ?? 0)),
   };
 }
 

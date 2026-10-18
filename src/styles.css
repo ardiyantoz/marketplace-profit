@@ -28,6 +28,7 @@
   --ply-ads-wash: #fbf3cc;
   --ply-ads-edge: #dcc562;
   --ads-ink: #c79a12;
+  --income-ink: #c4506d; /* Income ply as a data mark (chart bars) */
   /* Catatan: the seller's own notes (manual expenses), the fifth ply. */
   --ply-manual: #e4daf5;
   --ply-manual-wash: #f4effb;
@@ -260,7 +261,8 @@ tr.loss-row { background: var(--loss-wash); }
 .stat.result dt { color: var(--carbon-soft); }
 .stat.result.loss dd { color: var(--loss-on-carbon); }
 .stat:has(.stat-link):hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20, 27, 77, 0.1); }
-.stat-link { color: inherit; text-decoration: none; }
+.stat-link { color: inherit; text-decoration: none; border: 0; background: none; padding: 0; font: inherit; text-align: left; cursor: pointer; }
+.stat.open { box-shadow: 0 0 0 2px var(--carbon); }
 .stat .stat-cue { margin: 4px 0 0; font-size: var(--fs-xs); font-weight: 600; color: var(--carbon); display: inline-flex; gap: 4px; align-items: center; }
 .stat:has(.stat-link):hover .stat-cue { text-decoration: underline; text-underline-offset: 3px; }
 .stat-link::after { content: ''; position: absolute; inset: 0; border-radius: var(--radius); }

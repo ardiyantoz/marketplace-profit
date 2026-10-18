@@ -75,11 +75,15 @@ export function NoData({ M, onUpload, onSample }: { M: MarketplaceInfo; onUpload
 }
 
 /** A figure tile that names its source file and links to the rows behind it. */
-export function Stat({ source, label, value, href }: { source: Source; label: string; value: ReactNode; href?: string }) {
+export function Stat({ source, label, value, href, onOpen, open }: { source: Source; label: string; value: ReactNode; href?: string; onOpen?: () => void; open?: boolean }) {
   return (
-    <div className={`stat ${source}`}>
+    <div className={`stat ${source}${open ? ' open' : ''}`}>
       <dt>
-        {href ? (
+        {onOpen ? (
+          <button className="stat-link" aria-expanded={!!open} aria-controls="cash-trace" onClick={onOpen}>
+            {label}
+          </button>
+        ) : href ? (
           <a className="stat-link" href={href}>
             {label}
           </a>
@@ -89,9 +93,9 @@ export function Stat({ source, label, value, href }: { source: Source; label: st
         <Ply source={source} />
       </dt>
       <dd className="num">{value}</dd>
-      {href && (
+      {(href || onOpen) && (
         <dd className="stat-cue" aria-hidden="true">
-          Lihat baris <Icon name="arrow" size={14} />
+          {open ? 'Tutup baris' : 'Lihat baris'} <Icon name="arrow" size={14} />
         </dd>
       )}
     </div>
