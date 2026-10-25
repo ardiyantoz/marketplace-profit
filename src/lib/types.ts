@@ -48,8 +48,9 @@ export interface AdRow {
 }
 
 export interface FileMeta {
-  name: string;
-  rows: number;
+  name: string; // the latest file
+  names?: string[]; // every file uploaded to this slot, oldest first
+  rows: number; // rows of this kind for the store, after merging every file
   months: string[];
   warnings: string[];
 }

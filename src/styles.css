@@ -409,6 +409,7 @@ tr.loss-row { background: var(--loss-wash); }
 .slot.empty { background: transparent; border-style: dashed; border-color: var(--line-strong); }
 .slot-head { display: flex; justify-content: space-between; align-items: center; gap: var(--s2); }
 .slot-name { overflow-wrap: anywhere; color: var(--ink); }
+.slot-files { overflow-wrap: anywhere; font-size: var(--fs-xs); }
 .slot .warn { color: var(--warn); }
 .add-store { border: 2px dashed var(--line-strong); border-radius: var(--radius-lg); padding: var(--s5); display: flex; justify-content: space-between; align-items: center; gap: var(--s4); flex-wrap: wrap; }
 .add-store h2 { font-size: var(--fs-xl); font-weight: 700; }

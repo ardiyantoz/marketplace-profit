@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { allMonths, allProducts, summarize, type MonthFilter, type StoreFilter } from './lib/compute';
-import { monthLabel, prevMonth } from './lib/format';
+import { monthKey, monthLabel, prevMonth } from './lib/format';
 import { buildInsights, buildStoreInsights } from './lib/insights';
 import { infoFor, MARKETPLACES, type Marketplace } from './lib/marketplace';
 import { parseFile } from './lib/parse';
 import { sampleState } from './lib/sample';
 import { clearState, downloadBackup, loadState, readBackup, saveState } from './lib/storage';
-import { emptyDataset, emptySettings, productId, type Dataset, type Settings, type Store } from './lib/types';
+import { emptyDataset, emptySettings, productId, type AdRow, type Dataset, type FileMeta, type FileSlot, type Settings, type Store } from './lib/types';
 import { NoData, StoreMark } from './components/ui';
 import { Guide } from './views/Guide';
 import { Upload } from './views/Upload';
@@ -30,6 +30,24 @@ function dedupe<T>(rows: T[], key: (r: T) => string): T[] {
   const seen = new Map<string, T>();
   for (const r of rows) seen.set(key(r), r);
   return [...seen.values()];
+}
+
+const pad2 = (n: number) => String(n).padStart(2, '0');
+// An ad row is the same row again when a re-uploaded report has the same day and campaign.
+// Rows inside one file are never merged: a creatives report has many rows per day.
+const adKey = (a: AdRow) => (a.date ? `${a.date.getFullYear()}-${pad2(a.date.getMonth() + 1)}-${pad2(a.date.getDate())}|${a.campaign}` : `-|${a.campaign}|${a.product}`);
+
+/** What a slot shows after another file is added: every file name, and the rows and months now held for the store. */
+function mergedMeta(prev: FileMeta | undefined, added: FileMeta, dates: (Date | null)[]): FileMeta {
+  const names = [...new Set([...(prev ? (prev.names ?? [prev.name]) : []), added.name])];
+  const valid = dates.filter((d): d is Date => !!d && !Number.isNaN(d.getTime()));
+  return {
+    name: added.name,
+    names,
+    rows: dates.length,
+    months: [...new Set(valid.map(monthKey))].sort(),
+    warnings: [...new Set([...(prev?.warnings ?? []), ...added.warnings])],
+  };
 }
 
 const newId = () => `toko-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -182,10 +200,22 @@ export default function App() {
             continue;
           }
           const tag = <T extends { storeId: string }>(rows: T[]) => rows.map((r) => ({ ...r, storeId }));
-          const stores = next.stores.map((s) => (s.id === storeId ? { ...s, marketplace, files: { ...s.files, [parsed.kind]: parsed.meta } } : s));
-          if (parsed.kind === 'order') next = { ...next, stores, orders: dedupe([...next.orders, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}|${r.product}|${r.variant}`) };
-          else if (parsed.kind === 'income') next = { ...next, stores, income: dedupe([...next.income, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}`) };
-          else next = { ...next, stores, ads: [...next.ads, ...tag(parsed.rows)] };
+          // Files for months already uploaded replace those rows (newest wins) instead of counting them twice.
+          let dates: (Date | null)[];
+          if (parsed.kind === 'order') {
+            next = { ...next, orders: dedupe([...next.orders, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}|${r.product}|${r.variant}`) };
+            dates = next.orders.filter((r) => r.storeId === storeId).map((r) => r.date);
+          } else if (parsed.kind === 'income') {
+            next = { ...next, income: dedupe([...next.income, ...tag(parsed.rows)], (r) => `${r.storeId}|${r.orderNo}`) };
+            dates = next.income.filter((r) => r.storeId === storeId).map((r) => r.settled);
+          } else {
+            const added = tag(parsed.rows);
+            const again = new Set(added.map(adKey));
+            next = { ...next, ads: [...next.ads.filter((a) => a.storeId !== storeId || !again.has(adKey(a))), ...added] };
+            dates = next.ads.filter((r) => r.storeId === storeId).map((r) => r.date);
+          }
+          const kind: FileSlot = parsed.kind;
+          next = { ...next, stores: next.stores.map((s) => (s.id === storeId ? { ...s, marketplace, files: { ...s.files, [kind]: mergedMeta(s.files[kind], parsed.meta, dates) } } : s)) };
         } catch (e) {
           errs.push(e instanceof Error ? e.message : `${f.name}: file tidak bisa dibaca.`);
         }

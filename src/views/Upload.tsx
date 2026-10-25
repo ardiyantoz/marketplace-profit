@@ -100,7 +100,14 @@ function StoreCard({ store, errors, busy, onFiles, onUpdate, onRemove }: { store
               </div>
               {meta ? (
                 <>
-                  <p className="slot-name">{meta.name}</p>
+                  {(meta.names?.length ?? 1) > 1 ? (
+                    <>
+                      <p className="slot-name">{meta.names!.length} file digabung</p>
+                      <p className="muted slot-files">{meta.names!.join(' · ')}</p>
+                    </>
+                  ) : (
+                    <p className="slot-name">{meta.name}</p>
+                  )}
                   <p className="muted">{months(meta)}</p>
                   {meta.warnings.map((w) => (
                     <p key={w} className="warn">

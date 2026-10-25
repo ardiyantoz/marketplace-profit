@@ -13,6 +13,8 @@ npm run build      # hasil statis di dist/, bisa dibuka dari hosting statis mana
 npm run typecheck
 ```
 
+Upload boleh per bulan (Shopee hanya bisa ekspor 1 bulan sekali) dan boleh tumpang tindih: pesanan dan income yang sudah ada diganti versi terbaru, baris iklan untuk hari dan kampanye yang sama diganti, jadi tidak ada yang terhitung dua kali. Kartu toko menampilkan semua file yang sudah digabung.
+
 Belum punya file Shopee? Klik **Pakai data contoh** di tab Upload data. Data contoh adalah toko herbal fiktif dan selalu ditandai "Data contoh".
 
 ## Deploy ke Netlify
