@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-18T03:26:25.975570+00:00",
+  "generatedAt": "2026-10-27T12:28:02.923373+00:00",
   "title": "Design System: Profit Toko",
   "extensions": {
     "colorMeta": {
@@ -533,6 +533,54 @@
           "#f7dfe6"
         ],
         "note": "Income ply as a data mark on white (released-funds bars in the cash chart, legend). Not text, not a surface."
+      },
+      "ply-order-hover": {
+        "role": "secondary",
+        "displayName": "Order Hover",
+        "canonical": "#f7f8fc",
+        "tonalRamp": [
+          "#171d36",
+          "#29335e",
+          "#3b4985",
+          "#4d5fad",
+          "#7381c3",
+          "#9ca7d6",
+          "#c6cce8",
+          "#f7f8fc"
+        ],
+        "note": "Landing Order stub hover only; state tint of the white Order ply."
+      },
+      "ply-order-pressed": {
+        "role": "secondary",
+        "displayName": "Order Pressed",
+        "canonical": "#f3f4fa",
+        "tonalRamp": [
+          "#181d35",
+          "#2a335c",
+          "#3c4983",
+          "#4e5eaa",
+          "#7480c1",
+          "#9ea6d4",
+          "#c8cce6",
+          "#f3f4fa"
+        ],
+        "note": "Landing Order stub while its source ledger is open."
+      },
+      "perf": {
+        "role": "neutral",
+        "displayName": "Perforation",
+        "canonical": "rgba(20,27,77,0.24)",
+        "tonalRamp": [
+          "rgba(20,27,77,0.9)",
+          "rgba(20,27,77,0.7)",
+          "rgba(20,27,77,0.5)",
+          "rgba(20,27,77,0.36)",
+          "rgba(20,27,77,0.24)",
+          "rgba(20,27,77,0.16)",
+          "rgba(20,27,77,0.1)",
+          "rgba(20,27,77,0.05)"
+        ],
+        "note": "Ink at 24% alpha for punched perforation holes; ramp is alpha steps of ink. 16% step is the dashed reflow fallback."
       }
     },
     "typographyMeta": {
@@ -567,6 +615,34 @@
       "ply-chip": {
         "displayName": "Ply chip",
         "purpose": "Source chip text only (Order, Income, Iklan, HPP, Catatan)."
+      },
+      "landing-display": {
+        "displayName": "Landing display",
+        "purpose": "Landing hero headline only, written as figures; loss clause in loss red."
+      },
+      "landing-headline": {
+        "displayName": "Landing headline",
+        "purpose": "Landing section questions, privacy and FAQ headings."
+      },
+      "landing-close": {
+        "displayName": "Close headline",
+        "purpose": "Closing carbon band headline only."
+      },
+      "stub-figure": {
+        "displayName": "Stub figure",
+        "purpose": "Ply strip stub values."
+      },
+      "stub-result": {
+        "displayName": "Stub result",
+        "purpose": "Profit real stub value on carbon, in loss-on-carbon when negative."
+      },
+      "landing-lede": {
+        "displayName": "Lede",
+        "purpose": "Hero subline, max 52ch, ink-2."
+      },
+      "landing-body": {
+        "displayName": "Landing body",
+        "purpose": "Landing running text, ink-2, 46 to 64ch."
       }
     },
     "shadows": [
@@ -589,6 +665,21 @@
         "name": "focus",
         "value": "0 0 0 3px rgba(30,42,120,0.35)",
         "purpose": "Focus ring; rail uses 0 0 0 3px rgba(246,229,154,0.7)."
+      },
+      {
+        "name": "landing-ambient",
+        "value": "0 1px 2px rgba(20,27,77,0.08), 0 12px 32px rgba(20,27,77,0.08)",
+        "purpose": "Landing white cards: ply strip (as one row), source ledger, store table, kas ledger, split ledger, fix rows. Landing only."
+      },
+      {
+        "name": "stub-focus",
+        "value": "inset 0 0 0 3px rgba(30,42,120,0.45)",
+        "purpose": "Focused ply stub (inset inside the clipped strip)."
+      },
+      {
+        "name": "focus-on-carbon",
+        "value": "0 0 0 3px rgba(246,229,154,0.8)",
+        "purpose": "Controls in the closing carbon band; inset on the Profit real stub."
       }
     ],
     "motion": [
@@ -606,6 +697,21 @@
         "name": "reduced-motion",
         "value": "1ms",
         "purpose": "All animation and transition durations under prefers-reduced-motion."
+      },
+      {
+        "name": "ease-landing",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Landing state changes (160ms), stub deal and ledger open."
+      },
+      {
+        "name": "stub-deal",
+        "value": "700ms ease-landing, 70ms stagger",
+        "purpose": "Stubs deal in left to right once on load (fade, 14px rise, clip-path from top)."
+      },
+      {
+        "name": "ledger-open",
+        "value": "360ms ease-landing",
+        "purpose": "Source ledger fades and drops 6px in."
       }
     ],
     "breakpoints": [
@@ -616,6 +722,14 @@
       {
         "name": "ledger-stack",
         "value": "560px"
+      },
+      {
+        "name": "landing-tablet",
+        "value": "1080px"
+      },
+      {
+        "name": "landing-phone",
+        "value": "640px"
       }
     ]
   },
@@ -715,18 +829,67 @@
       "description": "White working panel on the cool ground.",
       "html": "<section class=\"ds-panel\"><h2>Profit per produk</h2><p>Urut dari profit terendah.</p></section>",
       "css": ".ds-panel{font-family:'Public Sans',system-ui,sans-serif;background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(20,27,77,.08),0 8px 24px rgba(20,27,77,.06);padding:24px;color:#141b4d;max-width:420px}.ds-panel h2{margin:0;font-size:1.125rem;font-weight:700;line-height:1.3}.ds-panel p{margin:4px 0 0;font-size:.8125rem;color:#5a628f}"
+    },
+    {
+      "name": "Ply Strip and Stub",
+      "kind": "custom",
+      "refersTo": "ply-strip",
+      "description": "Landing signature: one perforated receipt row of ply stubs ending in the carbon Profit real stub; pressing a stub opens its source ledger.",
+      "html": "<div class=\"ds-strip\"><button class=\"ds-stub o\" aria-expanded=\"false\"><span class=\"ds-chip\">Order</span><span class=\"l\">Omzet</span><span class=\"v\">Rp46,0 jt</span><span class=\"n\">280 pesanan</span></button><button class=\"ds-stub i\" aria-expanded=\"true\"><span class=\"ds-chip\">Income</span><span class=\"l\">Potongan marketplace</span><span class=\"v\">−Rp8,3 jt</span><span class=\"n\">komisi, layanan, ongkir</span></button><button class=\"ds-stub a\" aria-expanded=\"false\"><span class=\"ds-chip\">Iklan</span><span class=\"l\">Biaya iklan</span><span class=\"v\">−Rp7,4 jt</span><span class=\"n\">tidak dipotong Seller Center</span></button><button class=\"ds-stub r\" aria-expanded=\"false\"><span class=\"l\">Profit real</span><span class=\"v\">−Rp8,0 jt</span><span class=\"n\">margin −17,3%</span></button></div>",
+      "css": ".ds-strip{font-family:'Public Sans',system-ui,sans-serif;display:grid;grid-template-columns:1fr 1fr 1fr 1.3fr;border-radius:12px;overflow:hidden;box-shadow:0 1px 2px rgba(20,27,77,.08),0 12px 32px rgba(20,27,77,.08);max-width:760px}.ds-stub{font:inherit;position:relative;text-align:left;border:0;cursor:pointer;color:#141b4d;display:flex;flex-direction:column;gap:6px;padding:18px 18px 20px;min-height:168px;background:#fff;font-variant-numeric:tabular-nums;transition:background-color 160ms cubic-bezier(.16,1,.3,1)}.ds-stub+.ds-stub::before{content:'';position:absolute;left:-1px;top:8px;bottom:8px;width:2px;background:radial-gradient(circle,rgba(20,27,77,.24) 1.4px,transparent 1.6px) 0 0/2px 8px repeat-y}.ds-stub.o:hover{background:#f7f8fc}.ds-stub.o[aria-expanded=true]{background:#f3f4fa}.ds-stub.i{background:#fbeaf0}.ds-stub.i:hover,.ds-stub.i[aria-expanded=true]{background:#f6d3dd}.ds-stub.a{background:#fbf3cc}.ds-stub.a:hover,.ds-stub.a[aria-expanded=true]{background:#f6e59a}.ds-stub.r{background:#1e2a78;color:#fff}.ds-stub.r:hover,.ds-stub.r[aria-expanded=true]{background:#121a55}.ds-stub:focus-visible{outline:none;box-shadow:inset 0 0 0 3px rgba(30,42,120,.45)}.ds-stub.r:focus-visible{box-shadow:inset 0 0 0 3px rgba(246,229,154,.8)}.ds-chip{align-self:flex-start;display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;border:1px solid #c3c8e2;background:#fff;font-size:.6875rem;font-weight:700;letter-spacing:.02em}.ds-stub.i .ds-chip{background:#f6d3dd;border-color:#e2aebd}.ds-stub.a .ds-chip{background:#f6e59a;border-color:#dcc562}.ds-stub .l{font-size:.8125rem;color:#3f4884}.ds-stub .v{font-size:1.5rem;font-weight:800;letter-spacing:-.01em;line-height:1.15}.ds-stub .n{font-size:.75rem;color:#5a628f;margin-top:auto}.ds-stub.r .l,.ds-stub.r .n{color:#c9cfee}.ds-stub.r .v{color:#ffb3c4;font-size:2.25rem}"
+    },
+    {
+      "name": "Source Ledger",
+      "kind": "card",
+      "refersTo": "source-ledger",
+      "description": "Sample rows of the pressed stub's file, head tinted in its ply wash; the landing's trace.",
+      "html": "<div class=\"ds-ledger\"><div class=\"h\"><p><strong>Income</strong> · 3 dari 280 baris</p><button>Tutup</button></div><table><thead><tr><th>Pesanan</th><th class=\"r\">Komisi</th><th class=\"r\">Dana dilepas</th></tr></thead><tbody><tr><td>2605A1</td><td class=\"r\">−Rp12.600</td><td class=\"s r\">Rp147.400</td></tr><tr><td>2605A2</td><td class=\"r\">−Rp8.100</td><td class=\"s r\">Rp96.900</td></tr><tr class=\"m\"><td colspan=\"3\">dan 278 baris lagi</td></tr></tbody></table></div>",
+      "css": ".ds-ledger{font-family:'Public Sans',system-ui,sans-serif;background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(20,27,77,.08),0 12px 32px rgba(20,27,77,.08);overflow:hidden;color:#3f4884;max-width:520px;animation:ds-open 360ms cubic-bezier(.16,1,.3,1) both}@keyframes ds-open{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}.ds-ledger .h{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid #dde1f0;background:#fbeaf0;font-size:.875rem}.ds-ledger strong{color:#141b4d}.ds-ledger button{font-family:inherit;border:0;background:none;font-weight:700;font-size:.8125rem;color:#1e2a78;cursor:pointer;padding:6px 8px;border-radius:6px}.ds-ledger button:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(30,42,120,.35)}.ds-ledger table{width:100%;border-collapse:collapse;font-size:.875rem;font-variant-numeric:tabular-nums}.ds-ledger th{text-align:left;font-weight:600;font-size:.75rem;color:#5a628f;padding:10px 18px;border-bottom:1px solid #dde1f0}.ds-ledger td{padding:10px 18px;border-bottom:1px solid #dde1f0}.ds-ledger tr:last-child td{border-bottom:0}.ds-ledger .s{color:#141b4d;font-weight:700}.ds-ledger .m td{color:#5a628f;font-size:.8125rem}.ds-ledger .r{text-align:right}"
+    },
+    {
+      "name": "Running-balance Kas Ledger",
+      "kind": "card",
+      "refersTo": "kas-ledger",
+      "description": "Cash rows on their ply washes with a running balance, closed by a carbon Saldo akhir row.",
+      "html": "<div class=\"ds-kas\"><p class=\"hd\">Kas Mei–Jul 2026 · <span class=\"ds-sample\">Data contoh</span></p><table><thead><tr><th>Dari</th><th>Bagian</th><th class=\"r\">Jumlah</th><th class=\"r\">Saldo</th></tr></thead><tbody><tr><td></td><td>Saldo awal</td><td></td><td class=\"r b\">Rp10.000.000</td></tr><tr class=\"i\"><td><span class=\"c\">Income</span></td><td>Dana dilepas</td><td class=\"r\">Rp34.724.515</td><td class=\"r b\">Rp44.724.515</td></tr><tr class=\"a\"><td><span class=\"c\">Iklan</span></td><td>Iklan dibayar</td><td class=\"r\">−Rp7.438.800</td><td class=\"r b\">Rp37.285.715</td></tr><tr class=\"m\"><td><span class=\"c\">Catatan</span></td><td>Stok, gaji</td><td class=\"r\">−Rp31.500.000</td><td class=\"r b\">Rp5.785.715</td></tr></tbody><tfoot><tr><td></td><th>Saldo akhir</th><td></td><td class=\"r\">Rp5.785.715</td></tr></tfoot></table></div>",
+      "css": ".ds-kas{font-family:'Public Sans',system-ui,sans-serif;background:#fff;border-radius:12px;box-shadow:0 1px 2px rgba(20,27,77,.08),0 12px 32px rgba(20,27,77,.08);overflow:hidden;color:#3f4884;max-width:600px}.ds-kas .hd{margin:0;padding:16px 20px;font-weight:700;color:#141b4d;border-bottom:1px solid #dde1f0}.ds-sample{display:inline-block;background:#f6e59a;color:#141b4d;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px}.ds-kas table{width:100%;border-collapse:collapse;font-size:.9375rem;font-variant-numeric:tabular-nums}.ds-kas th,.ds-kas td{padding:12px 20px;text-align:left;border-bottom:1px solid #dde1f0}.ds-kas thead th{font-size:.75rem;font-weight:600;color:#5a628f}.ds-kas .r{text-align:right;white-space:nowrap}.ds-kas .b{color:#141b4d;font-weight:700}.ds-kas tr.i{background:#fbeaf0}.ds-kas tr.a{background:#fbf3cc}.ds-kas tr.m{background:#f4effb}.ds-kas .c{display:inline-flex;align-items:center;height:20px;padding:0 7px;border-radius:4px;font-size:.6875rem;font-weight:700;letter-spacing:.02em;color:#141b4d;border:1px solid}.ds-kas .i .c{background:#f6d3dd;border-color:#e2aebd}.ds-kas .a .c{background:#f6e59a;border-color:#dcc562}.ds-kas .m .c{background:#e4daf5;border-color:#c6b4e6}.ds-kas tfoot th,.ds-kas tfoot td{background:#1e2a78;color:#fff;border-bottom:0;font-weight:800}.ds-kas tfoot td:last-child{font-size:1.125rem}"
+    },
+    {
+      "name": "Perforated Divider",
+      "kind": "custom",
+      "refersTo": "perf",
+      "description": "The landing's only section divider: a row of punched holes, never a drawn rule.",
+      "html": "<div class=\"ds-perf-wrap\"><div class=\"ds-perf\"></div><h2>Punya beberapa toko. Yang mana yang sebenarnya rugi?</h2></div>",
+      "css": ".ds-perf-wrap{font-family:'Public Sans',system-ui,sans-serif;color:#141b4d;max-width:640px}.ds-perf{height:3px;background:radial-gradient(circle,rgba(20,27,77,.24) 1.4px,transparent 1.6px) 0 0/8px 3px repeat-x;margin-bottom:32px}.ds-perf-wrap h2{margin:0;font-size:2rem;line-height:1.1;letter-spacing:-.025em;font-weight:800}"
+    },
+    {
+      "name": "Sample Chip",
+      "kind": "chip",
+      "refersTo": "sample-chip",
+      "description": "\"Data contoh\" pill on every block of synthetic figures.",
+      "html": "<span class=\"ds-sample\">Data contoh</span>",
+      "css": ".ds-sample{font-family:'Public Sans',system-ui,sans-serif;display:inline-block;background:#f6e59a;color:#141b4d;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px}"
+    },
+    {
+      "name": "Closing Carbon Band",
+      "kind": "card",
+      "refersTo": "close-band",
+      "description": "Final call to action on solid carbon, its top edge torn along a perforation like the Profit real stub.",
+      "html": "<section class=\"ds-close\"><h2>Cek profit asli tokomu bulan ini.</h2><p>Gratis · tanpa daftar · file tidak keluar dari browsermu</p><div class=\"cta\"><a class=\"b l\" href=\"#\">Mulai dengan file tokomu</a><a class=\"b o\" href=\"#\">Coba dengan data contoh</a></div></section>",
+      "css": ".ds-close{font-family:'Public Sans',system-ui,sans-serif;position:relative;margin-top:12px;background:#1e2a78;color:#fff;border-radius:0 0 16px 16px;padding:48px 40px;max-width:760px}.ds-close::before{content:'';position:absolute;left:0;right:0;top:-5px;height:10px;background:radial-gradient(circle at 5px 5px,#e9ebf4 4px,transparent 4.5px) 0 0/10px 10px repeat-x}.ds-close h2{margin:0;font-size:2.5rem;line-height:1.05;letter-spacing:-.03em;font-weight:800}.ds-close p{margin:12px 0 0;color:#c9cfee}.ds-close .cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}.ds-close .b{display:inline-flex;align-items:center;height:48px;padding:0 22px;border-radius:6px;font-weight:700;font-size:.9375rem;text-decoration:none;border:1px solid transparent;transition:border-color 160ms cubic-bezier(.16,1,.3,1),transform 160ms cubic-bezier(.16,1,.3,1)}.ds-close .b:active{transform:translateY(1px)}.ds-close .l{background:#fff;color:#1e2a78}.ds-close .o{color:#fff;border-color:rgba(201,207,238,.55)}.ds-close .o:hover{border-color:#fff}.ds-close .b:focus-visible{outline:none;box-shadow:0 0 0 3px rgba(246,229,154,.8)}"
     }
   ],
   "narrative": {
     "northStar": "Nota Rangkap (the three-ply carbon receipt book)",
-    "overview": "The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the binding and the writing, and a coloured ply for each copy. Here every source file is a ply. Order is the white top sheet, Income the pink copy, Iklan (ads) the yellow copy, HPP (the seller's own cost) the pale blue copy, Catatan (the seller's own expense notes) the lavender copy. Any figure, card, tile, file card, guide card or trace that comes from one file is tinted in that file's ply colour and carries a small ply chip naming it. Provenance is the decoration; there is no other ornament. One seller may run several stores (Shopee and TikTok Shop mixed); stores are told apart by an outlined carbon monogram and a name, never by a colour, because colour already means \"which file\".\n\nDensity is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the store list (each store showing three tiny ply ticks for its files), a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.",
+    "overview": "The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the binding and the writing, and a coloured ply for each copy. Here every source file is a ply. Order is the white top sheet, Income the pink copy, Iklan (ads) the yellow copy, HPP (the seller's own cost) the pale blue copy, Catatan (the seller's own expense notes) the lavender copy. Any figure, card, tile, file card, guide card or trace that comes from one file is tinted in that file's ply colour and carries a small ply chip naming it. Provenance is the decoration; there is no other ornament. One seller may run several stores (Shopee and TikTok Shop mixed); stores are told apart by an outlined carbon monogram and a name, never by a colour, because colour already means \"which file\".\n\nDensity is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the store list (each store showing three tiny ply ticks for its files), a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.\n\nThe same world has two modes. The app (/app/) is **Operate**: the dense tool described above. The landing page (/) is **Persuade**: a question-led long page on the same cool ground, with no rail, a 1440px column and a scale step up (display headline to 4.75rem, 48px buttons, 1rem body). It redeclares the app's colour tokens and chip, button and monogram vocabulary rather than forking them, and adds one material property of the receipt book the app only implies: the perforation. The landing's own shadow and easing are slightly larger and softer than the app's and are recorded as landing values, not replacements.",
     "keyCharacteristics": [
       "Carbon-blue rail and ink; cool blue-tinted ground (never warm paper).",
       "Five ply colours used strictly as source codes, as a full fill (chips, rail ticks) or a wash (cards, tiles, traces).",
       "Stores identified by outlined carbon monograms and names, never by colour.",
       "Public Sans throughout, weights 400 to 800, tabular numerals on every figure and table.",
       "Stage card opens a trace panel of the rows that produced it, in the same ply wash.",
-      "Loss/gain colour is semantic only; computed results (profit, net cash flow, closing balance) sit on solid carbon."
+      "Loss/gain colour is semantic only; computed results (profit, net cash flow, closing balance) sit on solid carbon.",
+      "Operate (app) and Persuade (landing) share every colour token; the landing adds the perforation as its divider and edge device."
     ],
     "rules": [
       {
@@ -755,6 +918,11 @@
         "section": "colors"
       },
       {
+        "name": "The Loss Figure Rule",
+        "body": "On Persuade surfaces loss red marks only a loss figure: the headline's loss clause and a store's negative profit. Cost figures stay ink even with a minus sign, the negative Profit real on carbon is loss-on-carbon, and red is never a numeral badge, bullet or decoration.",
+        "section": "colors"
+      },
+      {
         "name": "The Tabular Rule",
         "body": "Every number that can sit above another number uses tabular numerals (`font-variant-numeric: tabular-nums`); tables get it by default.",
         "section": "typography"
@@ -773,6 +941,11 @@
         "name": "The Flat Ply Rule",
         "body": "Ply-tinted sheets never carry the ambient shadow; their edge colour is their depth.",
         "section": "elevation"
+      },
+      {
+        "name": "The Perforation Rule",
+        "body": "Pieces of one receipt are separated by punched holes in perf, never a drawn rule: a vertical column of 1.4px holes on an 8px pitch between ply stubs, a horizontal row of 1.4px holes on an 8px pitch as the divider above each landing section, and a row of 4px ground-coloured half-holes on a 10px pitch as the torn top edge of the closing carbon band. When the strip reflows and holes would float mid-grid, joins fall back to 1px dashed rgba(20,27,77,0.16).",
+        "section": "shapes"
       }
     ],
     "dos": [
@@ -781,7 +954,10 @@
       "Do identify a store with its monogram and name, and add the marketplace in muted text where stores mix.",
       "Do use tabular numerals for every rupiah and count.",
       "Do stack per-row tables into labelled ledger lines at ≤560px (`table.ledger` with `data-label` cells), one label-left / value-right line per figure.",
-      "Do express lift only on interaction: 2px rise plus hover shadow on clickable cards."
+      "Do express lift only on interaction: 2px rise plus hover shadow on clickable cards.",
+      "Do separate pieces of one receipt on the landing with perforations in perf, never a drawn rule.",
+      "Do label every block of synthetic figures on a Persuade surface with the Data contoh chip.",
+      "Do reuse the app's colour tokens, chips and monograms unchanged on Persuade surfaces; scale type and controls up, not the palette."
     ],
     "donts": [
       "Don't use ply colours as decoration on content that has no source file.",
@@ -790,7 +966,8 @@
       "Don't colour neutral totals red or green; loss and gain colours are reserved for signed values and states.",
       "Don't put the panel ambient shadow on ply-tinted sheets.",
       "Don't add uppercase tracked labels or eyebrow text above headings; labels stay sentence case.",
-      "Don't give Iklan yellow further non-source roles beyond the existing highlight uses (active step, selection, sample tag, empty input, warning rank)."
+      "Don't give Iklan yellow further non-source roles beyond the existing highlight uses (active step, selection, sample tag, empty input, warning rank).",
+      "Don't put loss red on anything but a loss figure on Persuade surfaces: not on cost figures, numeral badges or bullets."
     ]
   }
 }

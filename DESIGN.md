@@ -13,8 +13,11 @@ colors:
   surface: "#ffffff"
   line: "#dde1f0"
   line-strong: "#b6bcdd"
+  perf: "rgba(20,27,77,0.24)"
   ply-order: "#ffffff"
   ply-order-edge: "#c3c8e2"
+  ply-order-hover: "#f7f8fc"
+  ply-order-pressed: "#f3f4fa"
   ply-income: "#f6d3dd"
   ply-income-wash: "#fbeaf0"
   ply-income-edge: "#e2aebd"
@@ -83,11 +86,56 @@ typography:
     fontSize: "0.6875rem"
     fontWeight: 700
     letterSpacing: "0.02em"
+  landing-display:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(2.375rem, 5.3vw, 4.75rem)"
+    fontWeight: 800
+    lineHeight: 1
+    letterSpacing: "-0.035em"
+    fontFeature: "tnum"
+  landing-close:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(1.875rem, 3.6vw, 3rem)"
+    fontWeight: 800
+    lineHeight: 1.05
+    letterSpacing: "-0.03em"
+  landing-headline:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(1.625rem, 2.7vw, 2.375rem)"
+    fontWeight: 800
+    lineHeight: 1.1
+    letterSpacing: "-0.025em"
+  stub-result:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(1.75rem, 2.8vw, 2.5rem)"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.01em"
+    fontFeature: "tnum"
+  stub-figure:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(1.375rem, 2vw, 1.75rem)"
+    fontWeight: 800
+    lineHeight: 1.15
+    letterSpacing: "-0.01em"
+    fontFeature: "tnum"
+  landing-lede:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "clamp(1.0625rem, 1.4vw, 1.1875rem)"
+    fontWeight: 400
+    lineHeight: 1.55
+  landing-body:
+    fontFamily: "Public Sans, system-ui, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.55
+    fontFeature: "tnum"
 rounded:
   chip: "4px"
   control: "6px"
   card: "8px"
   panel: "12px"
+  band: "16px"
   pill: "999px"
 spacing:
   s1: "4px"
@@ -256,6 +304,74 @@ components:
     textColor: "{colors.warn}"
     rounded: "{rounded.pill}"
     padding: "2px 8px"
+  button-landing-primary:
+    backgroundColor: "{colors.carbon}"
+    textColor: "{colors.surface}"
+    rounded: "{rounded.control}"
+    padding: "0 22px"
+    height: "48px"
+  button-landing-secondary:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.carbon}"
+    rounded: "{rounded.control}"
+    padding: "0 22px"
+    height: "48px"
+  button-on-carbon:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.carbon}"
+    rounded: "{rounded.control}"
+    padding: "0 22px"
+    height: "48px"
+  button-outline-on-carbon:
+    textColor: "{colors.surface}"
+    rounded: "{rounded.control}"
+    padding: "0 22px"
+    height: "48px"
+  ply-strip:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.panel}"
+  stub-order:
+    backgroundColor: "{colors.ply-order}"
+    textColor: "{colors.ink}"
+    padding: "18px 18px 20px"
+  stub-order-hover:
+    backgroundColor: "{colors.ply-order-hover}"
+  stub-order-pressed:
+    backgroundColor: "{colors.ply-order-pressed}"
+  stub-income:
+    backgroundColor: "{colors.ply-income-wash}"
+    textColor: "{colors.ink}"
+    padding: "18px 18px 20px"
+  stub-income-pressed:
+    backgroundColor: "{colors.ply-income}"
+  stub-result:
+    backgroundColor: "{colors.carbon}"
+    textColor: "{colors.surface}"
+    typography: "{typography.stub-result}"
+    padding: "18px 18px 20px"
+  stub-result-pressed:
+    backgroundColor: "{colors.carbon-deep}"
+  source-ledger:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-2}"
+  kas-ledger:
+    backgroundColor: "{colors.surface}"
+    textColor: "{colors.ink-2}"
+    rounded: "{rounded.panel}"
+  kas-ledger-total:
+    backgroundColor: "{colors.carbon}"
+    textColor: "{colors.surface}"
+    padding: "12px 20px"
+  sample-chip:
+    backgroundColor: "{colors.ply-ads}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.pill}"
+    padding: "2px 9px"
+  close-band:
+    backgroundColor: "{colors.carbon}"
+    textColor: "{colors.surface}"
+    typography: "{typography.landing-close}"
+    padding: "clamp(40px, 6vw, 72px) clamp(24px, 5vw, 64px)"
 ---
 
 # Design System: Profit Toko
@@ -268,6 +384,8 @@ The world is the Indonesian carbon-copy receipt book: carbon-ink blue for the bi
 
 Density is that of a working tool, not a landing page: a fixed carbon rail on the left with six numbered steps and the store list (each store showing three tiny ply ticks for its files), a cool blue-grey ground, white panels with a soft ambient shadow, and tabular numerals everywhere money appears. The one oversized element is the verdict figure. Loss red and gain green appear only where a sign carries meaning.
 
+The same world has two modes. The app (/app/) is **Operate**: the dense tool described above. The landing page (/) is **Persuade**: a question-led long page on the same cool ground, with no rail, a 1440px column and a scale step up (display headline to 4.75rem, 48px buttons, 1rem body). It redeclares the app's colour tokens and chip, button and monogram vocabulary rather than forking them, and adds one material property of the receipt book the app only implies: the perforation. The landing's own shadow and easing are slightly larger and softer than the app's and are recorded as landing values, not replacements.
+
 **Key Characteristics:**
 - Carbon-blue rail and ink; cool blue-tinted ground (never warm paper).
 - Five ply colours used strictly as source codes, as a full fill (chips, rail ticks) or a wash (cards, tiles, traces).
@@ -275,6 +393,7 @@ Density is that of a working tool, not a landing page: a fixed carbon rail on th
 - Public Sans throughout, weights 400 to 800, tabular numerals on every figure and table.
 - Stage card opens a trace panel of the rows that produced it, in the same ply wash.
 - Loss/gain colour is semantic only; computed results (profit, net cash flow, closing balance) sit on solid carbon.
+- Operate (app) and Persuade (landing) share every colour token; the landing adds the perforation as its divider and edge device.
 
 ## Colors
 
@@ -285,7 +404,7 @@ A carbon-ink blue system with five pastel source plies and a strictly semantic l
 - **Carbon Soft / Carbon Mute** (carbon-soft, carbon-mute): text and step numbers on the rail; carbon-mute also fills "previous period" bars.
 
 ### Secondary: the plies (source codes)
-- **Order White** (ply-order, edge ply-order-edge): Order file. Its cards stay white with a blue-grey edge.
+- **Order White** (ply-order, edge ply-order-edge): Order file. Its cards stay white with a blue-grey edge. Because white cannot deepen into "its full ply" the way the other stubs do, the landing's Order stub takes **Order Hover** (ply-order-hover) on hover and **Order Pressed** (ply-order-pressed) while its source ledger is open. These two are state tints of the Order ply only.
 - **Income Pink** (ply-income, wash ply-income-wash, edge ply-income-edge): Income / Laporan Penghasilan file. The fee share bar extends this ply into a pink ramp (deep #a8324f to pale #f7dfe6), one step per fee line.
 - **Iklan Yellow** (ply-ads, wash ply-ads-wash, edge ply-ads-edge): Ads file. Also the system highlight: active rail step, text selection, "Data contoh" tag, empty-HPP input and warning-rank badges.
 - **Income Rose** (income-ink): the Income ply as a data mark on white: released-funds (Dana masuk) bars in the cash chart and their legend swatch. Never text, never a surface.
@@ -306,6 +425,7 @@ Full ply colour is for small marks (chips, rail ply sheets). Larger surfaces tak
 - **Cool Ground** (ground): app background, bar tracks, neutral score pill.
 - **Surface** (surface): panels, inputs, sticky table headers.
 - **Line / Line Strong** (line, line-strong): table rules and card edges; control borders and dashed drop zone.
+- **Perforation** (perf): the punched holes of the landing's perforation motif (see Shapes). Not a text or border colour. Where a perforation reflows into a grid join, the fallback is a 1px dashed line at rgba(20,27,77,0.16).
 
 ### Named Rules
 **The Ply Provenance Rule.** A ply colour means "this came from that file". Any figure derived from one source sits on that ply's wash and carries its chip; never use Income pink, Iklan yellow, HPP blue or Catatan lavender as decoration on unrelated content.
@@ -317,6 +437,8 @@ Full ply colour is for small marks (chips, rail ply sheets). Larger surfaces tak
 **The Monogram Rule.** A store is identified by its outlined carbon initials and its name (plus marketplace in muted text), never by a hue; no per-store colour coding in tables, charts or the rail.
 
 **The Earned Red Rule.** Loss red and gain green appear only on signed figures, loss rows and state badges. A neutral total is ink or carbon.
+
+**The Loss Figure Rule.** On Persuade surfaces loss red marks only a loss figure: the headline's loss clause and a store's negative profit. Cost figures stay ink even with a minus sign, the negative Profit real on carbon is loss-on-carbon, and red is never a numeral badge, bullet or decoration.
 
 ## Typography
 
@@ -337,6 +459,15 @@ Full ply colour is for small marks (chips, rail ply sheets). Larger surfaces tak
 - **Store monogram** (800, 0.75rem, +0.02em; 0.625rem in the 22px small mark): two-letter initials inside the store mark only. The 0.625rem step exists for the small mark alone and is not a text size.
 - **View tab** (700, 1rem; 0.875rem at ≤560px) with a 500 0.75rem ink-3 caption beneath naming the date basis.
 
+### Landing (Persuade) scale
+The landing keeps Public Sans and the same weights; only size and tracking open up, and every display size is fluid.
+- **Landing display** (800, clamp to 4.75rem, 1, -0.035em; max 15.5em wide): the hero headline only, written as figures ("Omzet Rp46 jt. ... Untungnya minus Rp8 jt."), its loss clause in loss red.
+- **Landing headline** (800, clamp to 2.375rem, 1.1, -0.025em): section questions, privacy and FAQ headings.
+- **Close headline** (800, clamp to 3rem, 1.05, -0.03em): the closing carbon band only.
+- **Stub figure** (800, clamp 1.375rem to 1.75rem, 1.15, -0.01em) and **Stub result** (same, clamp 1.75rem to 2.5rem): ply strip values; the Profit real stub is the largest number on the strip.
+- **Lede** (400, clamp 1.0625rem to 1.1875rem, 1.55, max 52ch, ink-2) and **landing body** (400, 1rem, 1.55, ink-2, 46 to 64ch).
+- Small type reuses the app's steps: stub label 0.8125rem ink-2, stub note and table headers 0.75rem ink-3, sentence case.
+
 ### Named Rules
 **The Tabular Rule.** Every number that can sit above another number uses tabular numerals (`font-variant-numeric: tabular-nums`); tables get it by default.
 
@@ -347,6 +478,8 @@ Full ply colour is for small marks (chips, rail ply sheets). Larger surfaces tak
 App shell: a 248px sticky carbon rail plus a fluid main column (max 1320px, padding 32px top and clamp(16px, 3vw, 40px) sides, 24px gap between blocks). Spacing follows a 4px base scale (s1 to s7). Grids are intrinsic `auto-fit` with minimums: stage cards 146px, stat tiles 160px, upload slots 200px, file cards 240px, guide cards 280px, two-up panels 380px. The verdict panel splits 1.1fr / 1fr between figure and diagnoses.
 
 At ≤900px the rail becomes a top band: steps scroll horizontally, the store list becomes a horizontally scrolling chip row (monogram and name, ply ticks hidden), rail notes and footer hide, the verdict stacks. At ≤560px panels and store cards tighten to 16px padding, view tabs split the width equally, the waterfall chart swaps to a list of horizontal tracks, insight cards drop to two columns, expense-form fields go full width, the store table drops its spark column, and per-row ledger tables stack: header hidden, the product or store name is a bold first line, and every other cell is one flex line with its column label left in 0.75rem ink-3 and the value flush right.
+
+Landing: one 1440px column with fluid side gutters (clamp(16px, 5vw, 72px)); sections breathe with clamp(48px, 7vw, 96px) vertical padding. Question sections split 5fr / 7fr (question and answer text left, the evidence card right), collapsing to one column at ≤1080px. The ply strip is six columns (1.05fr, four 1fr, 1.3fr for the result), three columns at ≤1080px, two at ≤640px; on a phone the actions move above the strip so they sit on the first screen.
 
 ### Named Rules
 **The Stacked Ledger Rule.** Any table a seller must read per row on a phone stacks into labelled ledger lines at ≤560px; it does not scroll sideways.
@@ -361,12 +494,23 @@ Hybrid and quiet. Panels, insights and the empty state lift off the cool ground 
 - **Selected outline** (`0 0 0 2px #1e2a78`): the open stage card; also the drag-over ring on a store card (stacked with the ambient shadow).
 - **Focus ring** (`0 0 0 3px rgba(30,42,120,0.35)`): all focusable elements.
 
+- **Landing ambient** (`0 1px 2px rgba(20,27,77,0.08), 0 12px 32px rgba(20,27,77,0.08)`): the landing's white cards (ply strip, source ledger, store table, kas ledger, split ledger, fix list). Landing only.
+- **Stub focus** (`inset 0 0 0 3px rgba(30,42,120,0.45)`): a focused ply stub, inset because stubs sit edge to edge inside the clipped strip.
+- **Focus on carbon** (`0 0 0 3px rgba(246,229,154,0.8)`, inset on the result stub): controls inside the closing band and the Profit real stub.
+
+On the landing the ambient shadow sits on the ply strip as one receipt row; the stubs inside it are flat, so the Flat Ply Rule still holds per sheet. Stubs do not lift on hover; they deepen from wash to full ply.
+
 ### Named Rules
 **The Flat Ply Rule.** Ply-tinted sheets never carry the ambient shadow; their edge colour is their depth.
 
 ## Shapes
 
 Small, even corners: 4px ply chips, 6px controls and rail steps, 8px cards, tiles, traces and notices, 12px panels and drop zone, full pills for score, status and sample tags. Store monograms are outlined squares: 32px with 6px corners and a 1.5px carbon border, 22px with 4px corners and a 1px border. Data marks use smaller radii of their own: 2px on rail ply ticks, legend swatches and cash-chart bars, 3px on waterfall list tracks, and the 14px share bar is a full pill (7px). Borders are 1px solid; dashed only for empty drop zones, empty file slots, missing file cards, the add-store card and the idle merge bar. Icons are 1.75-stroke inline SVG line icons at 18px.
+
+The landing keeps 12px panel corners for its cards (ply strip, store table, kas ledger, split ledger, fix rows, file cards) and adds 16px (band) for the bottom corners of the closing carbon band, whose top edge is torn rather than rounded.
+
+### Named Rules
+**The Perforation Rule.** Pieces of one receipt are separated by punched holes in perf, never a drawn rule: a vertical column of 1.4px holes on an 8px pitch between ply stubs, a horizontal row of 1.4px holes on an 8px pitch as the divider above each landing section, and a row of 4px ground-coloured half-holes on a 10px pitch as the torn top edge of the closing carbon band. When the strip reflows and holes would float mid-grid, joins fall back to 1px dashed rgba(20,27,77,0.16).
 
 ## Components
 
@@ -413,6 +557,24 @@ A ledger table with one row per store (store tag as a link that sets the store f
 ### Cash chart
 Weekly (or daily / monthly) bars around a zero line, every series in its source ply: inflow up in income-ink, ads down in ads-ink, recorded expenses stacked below in manual-ink, and the running balance as a 2px ink line ending in a labelled dot (loss red when negative). Legend swatches are 10px squares in the same tones.
 
+### Landing (Persuade) components
+
+**Buttons.** The app's primary and secondary buttons at 48px tall, 22px side padding, 700 at 0.9375rem, pressing down 1px on active. On carbon: a white button with carbon text and an outline button with white text on a carbon-soft 55% border that turns white on hover. The nav uses the 40px secondary.
+
+**Ply strip and stub (signature).** One clipped 12px receipt row of six button stubs in source order: Order, Income, Iklan, HPP, Catatan, then the solid carbon Profit real stub. Each stub stacks its ply chip, a 0.8125rem label, the stub figure and a 0.75rem note; min height 168px (132px on phone). Stubs sit on their ply wash, deepen to the full ply on hover and while expanded (Order uses its hover and pressed tints; the result deepens to carbon-deep), and reveal a "Lihat baris" cue (on the result, "Lihat hitungan"). Perforations separate them. On load they deal in left to right (700ms each, 70ms stagger, clip-path from the top); reduced motion removes it.
+
+**Source ledger.** Opens under the strip when a stub is pressed (`aria-expanded`), like the app's trace: a white shadowed card whose head is tinted in the stub's ply wash (carbon with white text for the result), a 0.875rem table of that file's sample rows with ink-3 0.75rem headers and line rules, the last cell bold ink, a muted "more" row, and a carbon text "Tutup" control. Fades and drops 6px in over 360ms.
+
+**Running-balance kas ledger.** A white 12px card: a bold head with the Data contoh chip, four columns (source chip, line, amount, running balance), each source row on its ply wash, the balance column bold ink, and a solid carbon Saldo akhir footer (white, 800). A pending-funds line below sits behind a 1px dashed Income edge with its Income chip. On a phone the chip column hides.
+
+**Store loss table.** A white 12px card with a caption carrying the Data contoh chip, store rows with an outlined carbon monogram, name and muted marketplace, the negative profit column in bold loss red, and a ground-coloured 800 total row under a 2px line-strong rule.
+
+**Perforated divider.** The horizontal perforation row above each question section and the "Cara kerja" section; it is the landing's only section divider.
+
+**Sample chip ("Data contoh").** Iklan yellow pill, ink 700 at 0.75rem, 2px 9px padding (3px 10px when pinned to the hero's top right). Every block of synthetic figures carries one.
+
+**Closing carbon band.** The page's last section: solid carbon, white close headline, carbon-soft line, the on-carbon buttons; 16px bottom corners and a perforated torn top edge, read as the Profit real stub torn off the book. Focus inside it is yellow.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -422,6 +584,9 @@ Weekly (or daily / monthly) bars around a zero line, every series in its source 
 - **Do** use tabular numerals for every rupiah and count.
 - **Do** stack per-row tables into labelled ledger lines at ≤560px (`table.ledger` with `data-label` cells), one label-left / value-right line per figure.
 - **Do** express lift only on interaction: 2px rise plus hover shadow on clickable cards.
+- **Do** separate pieces of one receipt on the landing with perforations in perf, never a drawn rule.
+- **Do** label every block of synthetic figures on a Persuade surface with the Data contoh chip.
+- **Do** reuse the app's colour tokens, chips and monograms unchanged on Persuade surfaces; scale type and controls up, not the palette.
 
 ### Don't:
 - **Don't** use ply colours as decoration on content that has no source file.
@@ -431,3 +596,4 @@ Weekly (or daily / monthly) bars around a zero line, every series in its source 
 - **Don't** put the panel ambient shadow on ply-tinted sheets.
 - **Don't** add uppercase tracked labels or eyebrow text above headings; labels stay sentence case.
 - **Don't** give Iklan yellow further non-source roles beyond the existing highlight uses (active step, selection, sample tag, empty input, warning rank).
+- **Don't** put loss red on anything but a loss figure on Persuade surfaces: not on cost figures, numeral badges or bullets.
