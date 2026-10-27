@@ -92,7 +92,8 @@ h1, h2, h3, p { margin: 0; }
 /* ---------- Shell ---------- */
 .shell { min-height: 100vh; display: grid; grid-template-columns: 248px minmax(0, 1fr); }
 .rail { background: var(--carbon); color: var(--carbon-soft); padding: var(--s5) var(--s4); display: flex; flex-direction: column; gap: var(--s6); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
-.brand { display: flex; flex-direction: column; gap: 2px; padding: 0 var(--s2); }
+.brand { display: flex; flex-direction: column; gap: 2px; padding: 0 var(--s2); text-decoration: none; border-radius: var(--radius); }
+.brand:focus-visible { box-shadow: 0 0 0 3px rgba(246, 229, 154, 0.7); }
 .brand strong { font-size: 1.0625rem; font-weight: 800; letter-spacing: -0.01em; color: #fff; }
 .brand span { font-size: var(--fs-xs); color: #b9c0e6; }
 .steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }

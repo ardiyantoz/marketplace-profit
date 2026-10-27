@@ -4,11 +4,19 @@ Dashboard profit dan cashflow untuk banyak toko Shopee dan TikTok Shop sekaligus
 
 Semua file dibaca dan dihitung di browser. Tidak ada server dan tidak ada data yang dikirim ke mana pun. Toko, data pesanan, HPP, produk gabungan, catatan pengeluaran dan saldo awal disimpan di IndexedDB browser ini (`src/lib/storage.ts`), jadi tidak perlu upload ulang. Tombol "Hapus semua data" di tab Upload menghapusnya. Data tidak sync antar browser atau PC; pakai **Simpan backup** / **Pulihkan dari backup** di tab Upload untuk memindahkannya (satu file `.json`).
 
+## Halaman
+
+- `/` — landing page (`index.html`, `src/landing/`): menjelaskan Profit Toko ke seller baru dengan data contoh, lalu mengarah ke aplikasi. Seller yang sudah punya data di browser ini melihat tombol "Lanjutkan ke dashboard".
+- `/app/` — aplikasinya (`app/index.html`, `src/main.tsx`). `?contoh=1` membuka data contoh (tidak pernah menimpa data toko sendiri), `?mulai=upload` membuka tab Upload data.
+- `/panduan-profit-toko.pdf` — panduan pemakaian (dari `public/`).
+
+Data tersimpan per domain, jadi pindah dari `/` ke `/app/` tidak menghapus data yang sudah ada.
+
 ## Menjalankan
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173 (landing), /app/ (aplikasi)
 npm run build      # hasil statis di dist/, bisa dibuka dari hosting statis mana pun
 npm run typecheck
 ```

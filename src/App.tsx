@@ -72,6 +72,17 @@ export default function App() {
         setSettings({ ...emptySettings, ...state.settings });
         if (state.data.orders.length) setTab('dashboard');
       }
+      // Links from the landing page: ?contoh=1 opens sample data, ?mulai=upload opens the upload tab.
+      // Sample data never replaces a seller's own stores.
+      const params = new URLSearchParams(window.location.search);
+      const ownData = !!state?.data?.stores?.length && !state.data.sample;
+      if (params.has('contoh') && !ownData) {
+        const s = sampleState();
+        setData(s.data);
+        setSettings(s.settings);
+        setTab('dashboard');
+      } else if (params.get('mulai') === 'upload') setTab('upload');
+      if (params.toString()) window.history.replaceState(null, '', window.location.pathname);
       setLoaded(true);
     });
   }, []);
@@ -272,10 +283,10 @@ export default function App() {
   return (
     <div className="shell">
       <nav className="rail" aria-label="Langkah">
-        <div className="brand">
+        <a className="brand" href="../" title="Tentang Profit Toko">
           <strong>Profit Toko</strong>
           <span>Profit asli semua tokomu</span>
-        </div>
+        </a>
         <ol className="steps">
           {TABS.map((t, i) => (
             <li key={t.id}>

@@ -3,10 +3,275 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profit Toko — Dashboard profit Shopee</title>
+    <title>Profit Toko · Profit asli toko Shopee & TikTok Shop</title>
+    <meta name="description" content="Dana cair dari Shopee atau TikTok Shop belum dipotong iklan dan modal barang. Profit Toko menghitung profit aslinya dari file Seller Center yang sudah kamu punya. Gratis, tanpa daftar, file tidak keluar dari browsermu." />
+    <meta name="theme-color" content="#1e2a78" />
+    <meta property="og:title" content="Profit Toko · Profit asli toko Shopee & TikTok Shop" />
+    <meta property="og:description" content="Omzet besar, dana cair lumayan, tapi untungnya berapa? Hitung dari file Seller Center yang sudah kamu punya." />
+    <meta property="og:type" content="website" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <a class="skip" href="#mulai">Lewati ke tombol mulai</a>
+
+    <header class="nav">
+      <a class="brand" href="./" aria-label="Profit Toko, beranda">
+        <strong>Profit Toko</strong>
+        <span>Profit asli semua tokomu</span>
+      </a>
+      <nav aria-label="Navigasi utama">
+        <a href="#cara-kerja">Cara kerja</a>
+        <a href="#pertanyaan">Pertanyaan</a>
+        <a class="btn btn-secondary btn-sm" href="./app/" data-open-app>Buka aplikasi</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- First viewport: the seller's situation, broken down by source file -->
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-head">
+          <h1 id="hero-title">Omzet Rp46&nbsp;jt. Dana cair Rp34,7&nbsp;jt. <span class="loss">Untungnya minus Rp8&nbsp;jt.</span></h1>
+          <span class="sample-tag">Data contoh</span>
+        </div>
+        <p class="lede">Seller Center tidak memotong biaya iklan dan modal barang, jadi Profit Toko menghitungnya dari file yang sudah kamu punya dan menunjukkan asal setiap rupiah.</p>
+
+        <div class="strip" role="group" aria-label="Dari omzet sampai profit real, data contoh. Pilih satu bagian untuk melihat baris asalnya.">
+          <button class="stub order" type="button" aria-expanded="false" aria-controls="ledger" data-stub="order" style="--i: 0">
+            <span class="chip">Order</span>
+            <span class="stub-label">Omzet</span>
+            <span class="stub-val">Rp46,0 jt</span>
+            <span class="stub-note">280 pesanan</span>
+          </button>
+          <button class="stub income" type="button" aria-expanded="false" aria-controls="ledger" data-stub="income" style="--i: 1">
+            <span class="chip">Income</span>
+            <span class="stub-label">Potongan marketplace</span>
+            <span class="stub-val">−Rp8,3 jt</span>
+            <span class="stub-note">komisi, layanan, ongkir</span>
+          </button>
+          <button class="stub ads" type="button" aria-expanded="false" aria-controls="ledger" data-stub="ads" style="--i: 2">
+            <span class="chip">Iklan</span>
+            <span class="stub-label">Biaya iklan</span>
+            <span class="stub-val">−Rp7,4 jt</span>
+            <span class="stub-note">tidak dipotong Seller Center</span>
+          </button>
+          <button class="stub hpp" type="button" aria-expanded="false" aria-controls="ledger" data-stub="hpp" style="--i: 3">
+            <span class="chip">HPP</span>
+            <span class="stub-label">Modal barang</span>
+            <span class="stub-val">−Rp32,1 jt</span>
+            <span class="stub-note">kamu isi sekali per produk</span>
+          </button>
+          <button class="stub manual" type="button" aria-expanded="false" aria-controls="ledger" data-stub="manual" style="--i: 4">
+            <span class="chip">Catatan</span>
+            <span class="stub-label">Operasional</span>
+            <span class="stub-val">−Rp6,0 jt</span>
+            <span class="stub-note">gaji, packaging, sewa</span>
+          </button>
+          <button class="stub result" type="button" aria-expanded="false" aria-controls="ledger" data-stub="result" style="--i: 5">
+            <span class="stub-label">Profit real</span>
+            <span class="stub-val">−Rp8,0 jt</span>
+            <span class="stub-note">margin −17,3% · 3 toko</span>
+          </button>
+        </div>
+
+        <p class="strip-hint">Pilih satu kotak untuk melihat baris asalnya.</p>
+        <div class="ledger" id="ledger" role="region" aria-live="polite" aria-label="Baris asal angka" hidden></div>
+
+        <div class="cta" id="mulai">
+          <a class="btn btn-primary" href="./app/?contoh=1" data-cta-primary>Coba dengan data contoh</a>
+          <a class="btn btn-secondary" href="./app/?mulai=upload" data-cta-secondary>Mulai dengan file tokomu</a>
+          <p class="trust">Gratis · tanpa daftar · file tidak keluar dari browsermu</p>
+        </div>
+      </section>
+
+      <!-- The seller's questions, answered one by one -->
+      <div id="pertanyaan" class="questions">
+        <section class="q" aria-labelledby="q1">
+          <div class="q-text">
+            <h2 id="q1">Dana cair sudah masuk. Kenapa belum tentu untung?</h2>
+            <p>Angka "Total Penghasilan" di Shopee atau "Jumlah penyelesaian" di TikTok Shop sudah dipotong biaya marketplace. Tapi iklan dibayar dari saldo terpisah, dan modal barang tidak pernah ada di laporan mana pun.</p>
+          </div>
+          <div class="split-ledger">
+            <div class="col">
+              <h3>Sudah dipotong Seller Center</h3>
+              <ul>
+                <li><span class="chip income">Income</span> Komisi atau biaya administrasi</li>
+                <li><span class="chip income">Income</span> Biaya layanan dan program</li>
+                <li><span class="chip income">Income</span> Komisi afiliasi / AMS</li>
+                <li><span class="chip income">Income</span> Ongkir yang kamu tanggung</li>
+              </ul>
+            </div>
+            <div class="col missing">
+              <h3>Belum dipotong. Ini yang ditambahkan Profit Toko</h3>
+              <ul>
+                <li><span class="chip ads">Iklan</span> Biaya iklan dan GMV Max</li>
+                <li><span class="chip hpp">HPP</span> Modal barang per produk</li>
+                <li><span class="chip manual">Catatan</span> Gaji, packaging, sewa</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="q" aria-labelledby="q2">
+          <div class="q-text">
+            <h2 id="q2">Punya beberapa toko. Yang mana yang sebenarnya rugi?</h2>
+            <p>Shopee dan TikTok Shop boleh dicampur. Produk yang sama di beberapa toko digabung, jadi modalnya cukup diisi sekali. Lalu setiap toko dihitung sendiri-sendiri.</p>
+          </div>
+          <div class="table-card">
+            <table>
+              <caption>Perbandingan toko · <span>Data contoh</span></caption>
+              <thead>
+                <tr><th scope="col">Toko</th><th scope="col" class="r">Omzet</th><th scope="col" class="r hide-sm">Iklan</th><th scope="col" class="r">Profit real</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row"><span class="mark">HU</span>Herbal Utama <small>Shopee</small></th><td class="r">Rp23.084.400</td><td class="r hide-sm">−Rp4.661.900</td><td class="r loss">−Rp4.382.384</td></tr>
+                <tr><th scope="row"><span class="mark">HL</span>Herbal Live <small>TikTok Shop</small></th><td class="r">Rp15.542.500</td><td class="r hide-sm">−Rp1.726.600</td><td class="r loss">−Rp2.248.725</td></tr>
+                <tr><th scope="row"><span class="mark">HH</span>Herbal Hemat <small>Shopee</small></th><td class="r">Rp7.360.100</td><td class="r hide-sm">−Rp1.050.300</td><td class="r loss">−Rp1.323.675</td></tr>
+              </tbody>
+              <tfoot>
+                <tr><th scope="row">Semua toko</th><td class="r">Rp45.987.000</td><td class="r hide-sm">−Rp7.438.800</td><td class="r loss">−Rp7.954.784</td></tr>
+              </tfoot>
+            </table>
+          </div>
+        </section>
+
+        <section class="q" aria-labelledby="q3">
+          <div class="q-text">
+            <h2 id="q3">Untung di atas kertas. Uangnya kapan benar-benar masuk?</h2>
+            <p>Profit dihitung per tanggal pesanan. Cashflow dihitung per tanggal uang bergerak: dana dilepas marketplace, iklan dibayar, dan pengeluaran yang kamu catat, lengkap dengan saldo berjalan dan dana yang masih tertahan.</p>
+          </div>
+          <div class="kas">
+            <p class="kas-head">Kas Mei–Jul 2026 · <span class="sample">Data contoh</span></p>
+            <table>
+              <caption class="visually-hidden">Arus kas data contoh, dengan saldo berjalan</caption>
+              <thead><tr><th scope="col">Dari</th><th scope="col">Bagian</th><th scope="col" class="r">Jumlah</th><th scope="col" class="r">Saldo</th></tr></thead>
+              <tbody>
+                <tr><td></td><td>Saldo awal, 1&nbsp;Mei</td><td class="r"></td><td class="r">Rp10.000.000</td></tr>
+                <tr class="income"><td><span class="chip income">Income</span></td><td>Dana dilepas marketplace</td><td class="r">Rp34.724.515</td><td class="r">Rp44.724.515</td></tr>
+                <tr class="ads"><td><span class="chip ads">Iklan</span></td><td>Iklan dibayar</td><td class="r">−Rp7.438.800</td><td class="r">Rp37.285.715</td></tr>
+                <tr class="manual"><td><span class="chip manual">Catatan</span></td><td>Stok, gaji, packaging, sewa</td><td class="r">−Rp31.500.000</td><td class="r">Rp5.785.715</td></tr>
+              </tbody>
+              <tfoot><tr><td></td><th scope="row">Saldo akhir</th><td class="r"></td><td class="r">Rp5.785.715</td></tr></tfoot>
+            </table>
+            <p class="kas-pending"><span class="chip income">Income</span> Dana tertahan (estimasi), belum dilepas: <strong>Rp2.335.388</strong></p>
+          </div>
+        </section>
+
+        <section class="q" aria-labelledby="q4">
+          <div class="q-text">
+            <h2 id="q4">Harus mulai perbaiki dari mana?</h2>
+            <p>Saran diurutkan dari potensi rupiah terbesar, dan setiap saran menyebut file asalnya. Kerjakan dari atas.</p>
+            <p><span class="sample">Data contoh</span></p>
+          </div>
+          <ol class="fixes">
+            <li>
+              <span class="fix-n">1</span>
+              <div><strong>5 produk merugi, total −Rp5,2&nbsp;jt</strong><p>Naikkan harga, tekan HPP, atau hentikan iklan untuk produk ini.</p></div>
+              <span class="fix-gain">+Rp5,2&nbsp;jt<small>potensi profit</small></span>
+            </li>
+            <li>
+              <span class="fix-n">2</span>
+              <div><strong>Toko Herbal Utama rugi −Rp4,4&nbsp;jt</strong><p>Mulai dari iklan toko ini: rasionya 20%, di atas batas 15%.</p></div>
+              <span class="fix-gain">+Rp4,4&nbsp;jt<small>potensi profit</small></span>
+            </li>
+            <li>
+              <span class="fix-n">3</span>
+              <div><strong>Toko Herbal Live rugi −Rp2,2&nbsp;jt</strong><p>Cek harga jual dan HPP produk terlaris toko ini.</p></div>
+              <span class="fix-gain">+Rp2,2&nbsp;jt<small>potensi profit</small></span>
+            </li>
+          </ol>
+          <p class="sample-note">Semua angka di halaman ini dari 3 toko herbal fiktif.</p>
+        </section>
+      </div>
+
+      <!-- How to get the files -->
+      <section class="how" id="cara-kerja" aria-labelledby="how-title">
+        <div class="how-head">
+          <h2 id="how-title">Tiga file yang sudah ada di Seller Center-mu</h2>
+          <div class="seg" role="group" aria-label="Pilih marketplace">
+            <button type="button" aria-pressed="true" data-mp="shopee">Shopee</button>
+            <button type="button" aria-pressed="false" data-mp="tiktok">TikTok Shop</button>
+          </div>
+        </div>
+        <ol class="files">
+          <li class="file order">
+            <span class="chip">Order</span>
+            <h3>File pesanan <small>wajib</small></h3>
+            <p class="path" data-shopee="Pesanan Saya › Export" data-tiktok="Pesanan › Kelola pesanan › Ekspor">Pesanan Saya › Export</p>
+            <p>Produk, jumlah, harga sebelum dan sesudah diskon, status pesanan.</p>
+          </li>
+          <li class="file income">
+            <span class="chip">Income</span>
+            <h3>File penghasilan <small>wajib</small></h3>
+            <p class="path" data-shopee="Keuangan › Penghasilan Saya › Sudah Dilepas" data-tiktok="Keuangan › Unduh › Riwayat ekspor">Keuangan › Penghasilan Saya › Sudah Dilepas</p>
+            <p>Semua potongan marketplace dan uang yang benar-benar cair.</p>
+          </li>
+          <li class="file ads">
+            <span class="chip">Iklan</span>
+            <h3>File iklan <small>opsional</small></h3>
+            <p class="path" data-shopee="Iklan Shopee › Laporan" data-tiktok="TikTok Ads Manager atau Iklan › GMV Max">Iklan Shopee › Laporan</p>
+            <p>Sering jadi biaya terbesar, dan tidak ada di file penghasilan.</p>
+          </li>
+        </ol>
+        <div class="how-steps">
+          <p><strong>Upload ke satu kartu per toko.</strong> Jenis file dikenali otomatis. Shopee hanya bisa ekspor satu bulan sekali? Upload saja per bulan; file yang ter-upload dua kali tidak dihitung dobel.</p>
+          <p><strong>Isi modal per produk sekali.</strong> Produk yang belum diisi tetap dihitung dengan estimasi dan diberi tanda.</p>
+          <p><a href="./panduan-profit-toko.pdf" download>Unduh panduan lengkap (PDF, 11 halaman)</a></p>
+        </div>
+      </section>
+
+      <!-- Privacy -->
+      <section class="safe" aria-labelledby="safe-title">
+        <h2 id="safe-title">Filemu tidak pernah meninggalkan browsermu.</h2>
+        <div class="safe-body">
+          <p>Profit Toko tidak punya server untuk datamu. File Excel dibaca dan dihitung langsung di browser yang kamu pakai, lalu disimpan di browser itu juga, jadi besok tidak perlu upload ulang.</p>
+          <p>Karena itu datanya tidak ikut pindah ke laptop atau browser lain. Pakai <strong>Simpan backup</strong> untuk menyimpan semuanya dalam satu file, lalu <strong>Pulihkan dari backup</strong> di tempat baru.</p>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Yang sering ditanyakan</h2>
+        <details>
+          <summary>Apakah gratis? Perlu daftar akun?</summary>
+          <p>Gratis dan tanpa daftar. Buka aplikasinya, lalu upload file atau coba data contoh.</p>
+        </details>
+        <details>
+          <summary>Toko Tokopedia bisa?</summary>
+          <p>Bisa, untuk toko Tokopedia yang sudah dikelola di Seller Center Tokopedia &amp; TikTok Shop. Menu dan format filenya sama dengan TikTok Shop.</p>
+        </details>
+        <details>
+          <summary>Saya punya toko Shopee dan TikTok Shop sekaligus.</summary>
+          <p>Tambahkan satu kartu per toko, campur saja. Dashboard menampilkan total semua toko, perbandingan per toko, dan filter untuk melihat satu toko saja.</p>
+        </details>
+        <details>
+          <summary>Apakah angkanya cocok dengan Seller Center?</summary>
+          <p>Dana cair dan potongan diambil dari baris laporan Seller Center itu sendiri, jadi totalnya bisa kamu cocokkan dengan ringkasan di laporan. Yang berbeda hanya yang memang tidak ada di sana: iklan, modal barang, dan pengeluaran yang kamu catat.</p>
+        </details>
+        <details>
+          <summary>Bisa dibuka di HP?</summary>
+          <p>Bisa untuk melihat hasil. Untuk upload file dan mengisi modal, laptop atau PC lebih nyaman.</p>
+        </details>
+        <details>
+          <summary>Kalau saya ganti laptop, datanya hilang?</summary>
+          <p>Data tersimpan per browser. Simpan backup di laptop lama, lalu pulihkan di laptop baru. Semua toko, modal, catatan, dan saldo ikut kembali.</p>
+        </details>
+      </section>
+
+      <!-- Close -->
+      <section class="close" aria-labelledby="close-title">
+        <h2 id="close-title">Cek profit asli tokomu bulan ini.</h2>
+        <p>Gratis · tanpa daftar · file tidak keluar dari browsermu</p>
+        <div class="cta">
+          <a class="btn btn-light" href="./app/?mulai=upload" data-cta-secondary>Mulai dengan file tokomu</a>
+          <a class="btn btn-outline-light" href="./app/?contoh=1" data-cta-primary>Coba dengan data contoh</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span><strong>Profit Toko</strong> · untuk seller Shopee &amp; TikTok Shop</span>
+      <span>Angka di halaman ini adalah data contoh dari toko fiktif. Tarif biaya hanya ilustrasi, bukan tarif resmi marketplace.</span>
+    </footer>
+
+    <script type="module" src="/src/landing/landing.ts"></script>
   </body>
 </html>

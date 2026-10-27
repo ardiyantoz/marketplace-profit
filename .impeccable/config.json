@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "index.html"
+        ],
+        "createdAt": "2026-10-27T12:20:52.086Z",
+        "reason": "Claude: false positive, index.html loads its CSS via the landing.ts module so static analysis sees every role at 16px; rendered h1 76px, h2 38px, body 16px (desktop.png)"
+      }
+    ]
+  }
+}
